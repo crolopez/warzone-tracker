@@ -1,0 +1,44 @@
+{
+  "name": "warzone-tracker",
+  "version": "0.0.1",
+  "license": "GPL-3.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/crolopez/warzone-tracker/"
+  },
+  "main": "dist/src/handler.js",
+  "author": "Cristobal Lopez Peñalver",
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "build": "rimraf ./dist && tsc",
+    "start:local": "serverless offline",
+    "deploy": "serverless deploy",
+    "deploy:production": "yarn deploy --stage production",
+    "remove": "serverless remove",
+    "test:unit": "jest",
+    "test:unit:coverage": "yarn test:unit --coverage",
+    "test:unit:ci": "yarn test:unit --ci --runInBand",
+    "test:unit:coverage:ci": "yarn test:unit:ci --coverage"
+  },
+  "dependencies": {
+    "axios": "^0.26.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.93",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
+    "aws-lambda": "^1.0.7",
+    "eslint": "^8.11.0",
+    "jest": "^27.5.1",
+    "serverless": "^3.7.5",
+    "serverless-dotenv-plugin": "^3.12.2",
+    "serverless-offline": "^8.5.0",
+    "telegram-typings": "^5.0.0",
+    "ts-jest": "^27.1.3",
+    "tsc": "^2.0.4",
+    "typescript": "^4.6.2"
+  }
+}

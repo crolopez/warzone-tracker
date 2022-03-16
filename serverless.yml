@@ -1,0 +1,35 @@
+service: warzone-tracker
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-west-3
+  stage: dev
+  environment:
+    TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
+
+package:
+  individually: true
+  exclude:
+    - "*"
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+
+functions:
+  warzone-tracker-function:
+    handler: dist/src/handler.handle
+    memorySize: 256
+    package:
+      include:
+        - dist
+        - node_modules
+    events:
+      - http:
+          path: warzone-tracker
+          method: post
+          cors: true
