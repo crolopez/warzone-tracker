@@ -11,7 +11,7 @@ jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
 
 jest.mock('../../../../../../package.json', () => {
   return {
-    version: 'DummyVersion'
+    version: 'DummyVersion',
   }
 })
 

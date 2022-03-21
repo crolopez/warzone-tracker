@@ -34,7 +34,7 @@ describe('telegramSender', () => {
   })
 
   test('#send', async () => {
-    const response = await telegramSender.send(999, 'Dummy text')
+    await telegramSender.send(999, 'Dummy text')
 
     expect(axios.post).toBeCalledWith(apiUrl, postBody)
   })

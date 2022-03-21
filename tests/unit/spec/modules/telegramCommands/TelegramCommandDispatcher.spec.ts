@@ -19,7 +19,7 @@ describe('TelegramCommandDispatcher', () => {
   const telegramCommandRegex = '^/([^ ]+)[ ]*([^ ]*)[ ]*([^ ]*)'
   const telegramCommands = [
     updateSSOCommand,
-    versionCommand
+    versionCommand,
   ]
 
   test('Parent constructor is called using the expected commands', async () => {

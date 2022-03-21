@@ -8,7 +8,7 @@ export class TelegramCommandDispatcher extends CommandDispatcher {
   constructor() {
     super(commandRegex, [
       updateSSOCommand,
-      versionCommand
+      versionCommand,
     ])
   }
 }
