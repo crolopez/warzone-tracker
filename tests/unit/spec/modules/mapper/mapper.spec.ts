@@ -1,4 +1,5 @@
 import { mapper } from '../../../../../src/modules/mapper/mapper'
+import { TelegramEvent } from '../../../../../src/modules/telegramEventParser/types/TelegramEvent'
 
 describe('mapper', () => {
   const telegramEvent = {
@@ -26,5 +27,12 @@ describe('mapper', () => {
         username: 'UserName',
       },
     })
+  })
+
+  test('#telegramEventToTelegramCommandRequest (undefined)', async () => {
+    const commandRequest = mapper.telegramEventToTelegramCommandRequest(
+      {... telegramEvent, message: undefined} as unknown as TelegramEvent)
+
+    expect(commandRequest).toStrictEqual(undefined)
   })
 })

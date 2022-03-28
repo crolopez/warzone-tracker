@@ -23,11 +23,15 @@ To configure the application you have to set the following environment variables
 | Field | Description |
 |-|-|
 | TELEGRAM_BOT_TOKEN | API token from your Telegram bot |
+| DATABASE_CONNECTION_STRING | Connection string to the MongoDB service |
+| ACCEPT_SSO_FROM | Accept SSO tokens only from the user specified here |
 
 Example:
 
 ``` bash
 TELEGRAM_BOT_TOKEN=129238594:AAF5Safasfj899834781l8asdaszZ3
+DATABASE_CONNECTION_STRING=https://db8a89sd9keladsa.asd992klas.com/user=9384839
+ACCEPT_SSO_FROM=manoleitor#53781
 ```
 
 ## Telegram commands
@@ -36,4 +40,5 @@ These are the commands you can interact with using the Telegram bot.
 
 | Command | Description |
 |-|-|
-| `/Version` | Get the bot version. |
+| `/UpdateSSO <SSO>` | Register a SSO to be able to use the bot |
+| `/Version` | Get the bot version |

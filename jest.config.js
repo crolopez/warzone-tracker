@@ -23,8 +23,8 @@ module.exports = {
   // Coverage
   collectCoverageFrom: [
     '<rootDir>/src/**/*.ts',
+    '!<rootDir>/src/**/models/**/*.ts',
     '!<rootDir>/src/handler.ts',
-    '!<rootDir>/src/utils/messages.ts',
   ],
   coverageThreshold: {
     global: {

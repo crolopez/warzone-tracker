@@ -1,6 +1,6 @@
 {
   "name": "warzone-tracker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "GPL-3.0",
   "description": "",
   "repository": {
@@ -22,7 +22,8 @@
     "test:unit:coverage:ci": "yarn test:unit:ci --coverage"
   },
   "dependencies": {
-    "axios": "^0.26.1"
+    "axios": "^0.26.1",
+    "mongoose": "^6.2.7"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.93",

@@ -2,16 +2,18 @@ import { TelegramCommandRequest } from '../telegramCommands/types/TelegramComman
 import { TelegramEvent } from '../telegramEventParser/types/TelegramEvent'
 
 class Mapper {
-  telegramEventToTelegramCommandRequest(event: TelegramEvent): TelegramCommandRequest {
-    return {
-      source: {
-        chatId: event.message.chat.id,
-        firstName: event.message.chat.first_name,
-        username: event.message.chat.username,
-        type: event.message.chat.type,
-      },
-      command: event.message.text,
-    }
+  telegramEventToTelegramCommandRequest(event: TelegramEvent): TelegramCommandRequest | undefined {
+    return event.message !== undefined
+      ? {
+        source: {
+          chatId: event.message.chat.id,
+          firstName: event.message.chat.first_name,
+          username: event.message.chat.username,
+          type: event.message.chat.type,
+        },
+        command: event.message.text,
+      }
+      : undefined
   }
 }
 

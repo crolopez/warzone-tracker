@@ -2,13 +2,22 @@ import { configReader } from '../../../../../src/modules/configReader/configRead
 
 describe('configReader', () => {
   const testBotToken = 'TEST:BOT-TOKEN'
+  const testDatabaseConnectionString = 'TEST:DB-CONNECTION-STRING'
+  const testAcceptSSOFrom = 'TEST:ACCEPT-SSO-FROM'
+
+  beforeEach(() => {
+    process.env.TELEGRAM_BOT_TOKEN = testBotToken
+    process.env.DATABASE_CONNECTION_STRING = testDatabaseConnectionString
+    process.env.ACCEPT_SSO_FROM = testAcceptSSOFrom
+  })
 
   test('#getConfig', async () => {
-    process.env.TELEGRAM_BOT_TOKEN = testBotToken
     const config = configReader.getConfig()
 
     expect(config).toStrictEqual({
       telegramBotToken: testBotToken,
+      databaseConnectionString: testDatabaseConnectionString,
+      acceptSSOFrom: testAcceptSSOFrom,
     })
   })
 
@@ -20,6 +29,28 @@ describe('configReader', () => {
       expect(1).toBe(0)
     } catch (error: any) {
       expect(error.message).toBe('TELEGRAM_BOT_TOKEN is undefined')
+    }
+  })
+
+  test('#getConfig (DATABASE_CONNECTION_STRING undefined)', async () => {
+    try {
+      delete process.env.DATABASE_CONNECTION_STRING
+      configReader.getConfig()
+
+      expect(1).toBe(0)
+    } catch (error: any) {
+      expect(error.message).toBe('DATABASE_CONNECTION_STRING is undefined')
+    }
+  })
+
+  test('#getConfig (ACCEPT_SSO_FROM undefined)', async () => {
+    try {
+      delete process.env.ACCEPT_SSO_FROM
+      configReader.getConfig()
+
+      expect(1).toBe(0)
+    } catch (error: any) {
+      expect(error.message).toBe('ACCEPT_SSO_FROM is undefined')
     }
   })
 })

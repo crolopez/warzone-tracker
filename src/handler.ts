@@ -7,15 +7,18 @@ const handle: APIGatewayProxyHandler = async (event: any) => {
   try {
     const parsedEvent = telegramEventParser.parse(event)
     const commandRequest = mapper.telegramEventToTelegramCommandRequest(parsedEvent)
-    const response = await new TelegramCommandDispatcher().dispatch(commandRequest)
+    const response = commandRequest !== undefined
+      ? await new TelegramCommandDispatcher().dispatch(commandRequest)
+      : 'Unprocessed message'
     return {
       body: JSON.stringify(response),
       statusCode: 200,
     }
   } catch (error: any) {
+    console.error(error.message)
     return {
-      body: JSON.stringify({ reason: error.message }),
-      statusCode: 500,
+      body: JSON.stringify({ error: error.message }),
+      statusCode: 200,
     }
   }
 }

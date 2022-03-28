@@ -5,7 +5,7 @@ import { telegramSender } from '../../telegramSender/telegramSender'
 import { TelegramCommandRequest } from '../types/TelegramCommandRequest'
 import { version } from '../../../../package.json'
 
-const getVersion = async (commandRequest: CommandRequest, args?: string[]): Promise<CommandResponse> => {
+const getVersion = async (commandRequest: CommandRequest, args: string[]): Promise<CommandResponse> => {
   const packageVersion = `*Version:* ${version}`
   const request = commandRequest as TelegramCommandRequest
   const response = await telegramSender.send(request.source.chatId, packageVersion)

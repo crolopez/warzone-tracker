@@ -14,7 +14,7 @@ class TelegramEventParser {
 
       return parsedEvent as TelegramEvent
     } catch (error: any) {
-      console.log(`Could not parse Telegram event: ${error.message}`)
+      console.error(`Could not parse Telegram event: ${error.message}`)
       throw new Error(InvalidTelegramEvent)
     }
   }
