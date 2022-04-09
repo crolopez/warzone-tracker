@@ -1,65 +1,89 @@
-import axios from 'axios'
 import { codAPIHandler } from '../../../../../src/modules/codAPIHandler/codAPIHandler'
+import { Match } from '../../../../../src/modules/codAPIHandler/types/Match'
+import { sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
 
-jest.mock('axios')
+jest.mock('../../../../../src/modules/codAPIHandler/utils')
+const sendRequestMock = sendRequest as jest.MockedFunction<typeof sendRequest>
+const sendUserRequestMock = sendUserRequest as jest.MockedFunction<typeof sendUserRequest>
 
 describe('codAPIHandler', () => {
-  const testUser = 'FakeUser'
+  const testUser = 'FakeUser#9812'
   const testSSO = 'FakeSSO'
+  const testRoute = '/api/fake-route'
 
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  test('#IsValidSSO (request failed)', async () => {
-    axios.post = jest.fn().mockResolvedValue(
-      {
-        data: {
-          status: 'Failed',
-          data: {
-            message: 'Invalid request',
-          },
-        },
-      })
-
-    try {
-      await codAPIHandler.IsValidSSO(testUser, testSSO)
-
-      expect(1).toBe(0)
-    } catch (error: any) {
-      expect(error.message).toBe('Invalid request')
-    }
-  })
-
   test('#IsValidSSO (user is not allowed)', async () => {
-    axios.post = jest.fn().mockResolvedValue(
-      {
-        data: {
-          status: 'success',
-          data: {
-            titleIdentities: [],
-          },
-        },
-      })
+    sendRequestMock.mockResolvedValueOnce({
+      status: 'success',
+      data: {
+        message: '',
+        titleIdentities: undefined,
+      },
+    })
 
-    const response = await codAPIHandler.IsValidSSO(testUser, testSSO)
+    const response = await codAPIHandler.IsValidSSO(testRoute, testSSO)
 
     expect(response).toBe(false)
   })
 
   test('#IsValidSSO (user is allowed)', async () => {
-    axios.post = jest.fn().mockResolvedValue(
-      {
-        data: {
-          status: 'success',
-          data: {
-            titleIdentities: [ { username: 'FakeUser' } ],
-          },
-        },
-      })
+    sendRequestMock.mockResolvedValueOnce({
+      status: 'success',
+      data: {
+        message: '',
+        titleIdentities: [{
+          username: 'FakeUser#9812',
+        }],
+      },
+    })
 
     const response = await codAPIHandler.IsValidSSO(testUser, testSSO)
 
     expect(response).toBe(true)
+  })
+
+  test('#GetLastMatch (no matches found)', async () => {
+    sendUserRequestMock.mockResolvedValueOnce({
+      status: 'success',
+      data: {
+        message: 'Fake error',
+        titleIdentities: undefined,
+      },
+    })
+
+    try {
+      await codAPIHandler.GetLastMatch(testSSO, testUser)
+
+      expect(1).toBe(0)
+    } catch(error: any) {
+      expect(error.message).toBe('Fake error')
+    }
+  })
+
+  test('#GetLastMatch (returns last match)', async () => {
+    sendUserRequestMock.mockResolvedValueOnce({
+      status: 'success',
+      data: {
+        message: '',
+        matches: [
+          {
+            utcStartSeconds: 20,
+          },
+          {
+            utcStartSeconds: 30,
+          },
+          {
+            utcStartSeconds: 10,
+          },
+        ] as unknown as Match[],
+      },
+    })
+
+    const response = await codAPIHandler.GetLastMatch(testSSO, testUser)
+
+    expect(response.utcStartSeconds).toBe(30)
   })
 })

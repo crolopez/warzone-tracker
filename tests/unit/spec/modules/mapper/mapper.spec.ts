@@ -1,5 +1,5 @@
 import { mapper } from '../../../../../src/modules/mapper/mapper'
-import { TelegramEvent } from '../../../../../src/modules/telegramEventParser/types/TelegramEvent'
+import { TelegramEvent } from '../../../../../src/modules/parsers/types/TelegramEvent'
 
 describe('mapper', () => {
   const telegramEvent = {

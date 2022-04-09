@@ -1,36 +1,30 @@
-import axios from 'axios'
+import { IdentitiesRequest, MatchesRequest } from './apiPaths'
+import { Match } from './types/Match'
 import { TitleIdentity } from './types/TitleIdentity'
-
-const codApi = 'https://my.callofduty.com/api/papi-client'
-
-function getHeaders(ssoToken: string) {
-  return {
-    'content-type': 'application/json',
-    'ACT_SSO_COOKIE': ssoToken,
-    'atvi-auth': ssoToken,
-  }
-}
-
-async function sendRequest(ssoToken:string, route: string): Promise<any> {
-  const { data } = await axios.post(`${codApi}${route}`, {},
-    {
-      headers: getHeaders(ssoToken),
-    })
-
-  if (data.status !== 'success') {
-    console.log(`Request failed: ${data.data.message}'`)
-    throw new Error(data.data.message)
-  }
-
-  return data.data
-}
+import { assertValidResponse, sendRequest, sendUserRequest } from './utils'
 
 class CoDAPIHandler {
   async IsValidSSO(allowedUser: string, ssoToken: string): Promise<boolean> {
-    const { titleIdentities } = await sendRequest(ssoToken, '/crm/cod/v2/identities')
+    const response = await sendRequest(ssoToken, IdentitiesRequest)
+    assertValidResponse(response)
+
+    const { titleIdentities } = response.data
+    if (titleIdentities == undefined) return false
 
     const userEntries: TitleIdentity[] = titleIdentities.filter((x: TitleIdentity) => x.username == allowedUser)
     return userEntries.length > 0
+  }
+
+  async GetLastMatch(sso: string, user: string): Promise<Match> {
+    const response = await sendUserRequest(sso, user, MatchesRequest)
+    assertValidResponse(response)
+
+    if (response.data.matches === undefined) {
+      throw new Error(response.data.message)
+    }
+
+    return response.data.matches
+      .sort((x, y) => y.utcStartSeconds - x.utcStartSeconds)[0]
   }
 }
 

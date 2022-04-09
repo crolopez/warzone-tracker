@@ -1,18 +1,19 @@
+const mockConnect = jest.fn()
+
 import mongoose from 'mongoose'
 import CredentialsModel from '../../../../../src/models/CredentialsModel'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
 
 jest.mock('mongoose', () => {
   return {
-    connect: jest.fn(),
+    connect: mockConnect,
     connection: jest.fn(),
   }
 })
 
 jest.mock('../../../../../src/models/CredentialsModel', () => {
   return function() {
-    return {
-    }
+    return {}
   }
 })
 
@@ -33,6 +34,7 @@ describe('dbHandler', () => {
     jest.clearAllMocks()
     CredentialsModel.init = jest.fn()
     CredentialsModel.create = jest.fn()
+    CredentialsModel.find = jest.fn().mockReturnValue([{}])
     CredentialsModel.findByIdAndUpdate = jest.fn()
   })
 
@@ -53,39 +55,41 @@ describe('dbHandler', () => {
   })
 
   test('#getCredentials (calls mongoose.connect)', async () => {
-    const connectSpy = jest.spyOn(mongoose, 'connect')
-
     await dbHandler.getCredentials()
 
-    expect(connectSpy).toBeCalled()
+    expect(mockConnect).toBeCalled()
   })
 
   test('#getCredentials (does not call mongoose.connect)', async () => {
     Object.defineProperty(mongoose.connection, 'host', {
-      value: jest.fn().mockReturnValue({
-        host: 'FakeHost',
-      }),
+      value: 'FakeHost',
+      configurable: true,
     })
-    const connectSpy = jest.spyOn(mongoose, 'connect')
 
     await dbHandler.getCredentials()
 
-    expect(connectSpy).toBeCalledTimes(0)
+    expect(mockConnect).toBeCalledTimes(0)
+  })
+
+  test('#getCredentials (mongoose.connect throws an error)', async () => {
+    Object.defineProperty(mongoose.connection, 'host', {
+      value: undefined,
+      configurable: true,
+    })
+    mongoose.connect = jest.fn().mockImplementation(() => {
+      throw new Error()
+    })
+    const processExitMock = jest.spyOn(process, 'exit').mockImplementation()
+
+    await dbHandler.getCredentials()
+
+    expect(processExitMock).toBeCalledTimes(1)
   })
 
   test('#updateCredentials', async () => {
     await dbHandler.updateCredentials(testSSOToken)
 
     expect(CredentialsModel.findByIdAndUpdate).toBeCalled()
-  })
-
-  test('#updateCredentials (credentials not found)', async () => {
-    CredentialsModel.find = jest.fn().mockResolvedValue([])
-
-    await dbHandler.updateCredentials(testSSOToken)
-
-    expect(CredentialsModel.init).toBeCalled()
-    expect(CredentialsModel.create).toBeCalled()
   })
 
   test('#updateCredentials (credentials not found)', async () => {

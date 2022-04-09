@@ -1,4 +1,5 @@
 import { CommandDispatcher } from '../../../../../src/modules/commandDispatcher/CommandDispatcher'
+import { lastMatchCommand } from '../../../../../src/modules/telegramCommands/commands/lastMatchCommand'
 import { updateSSOCommand } from '../../../../../src/modules/telegramCommands/commands/updateSSOCommand'
 import { versionCommand } from '../../../../../src/modules/telegramCommands/commands/versionCommand'
 import { TelegramCommandDispatcher } from '../../../../../src/modules/telegramCommands/TelegramCommandDispatcher'
@@ -20,6 +21,7 @@ describe('TelegramCommandDispatcher', () => {
   const telegramCommands = [
     updateSSOCommand,
     versionCommand,
+    lastMatchCommand,
   ]
 
   test('Parent constructor is called using the expected commands', async () => {
