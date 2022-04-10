@@ -2,6 +2,7 @@ const mockConnect = jest.fn()
 
 import mongoose from 'mongoose'
 import CredentialsModel from '../../../../../src/models/CredentialsModel'
+import UserMetadataModel from '../../../../../src/models/UserMetadataModel'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
 
 jest.mock('mongoose', () => {
@@ -12,6 +13,12 @@ jest.mock('mongoose', () => {
 })
 
 jest.mock('../../../../../src/models/CredentialsModel', () => {
+  return function() {
+    return {}
+  }
+})
+
+jest.mock('../../../../../src/models/UserMetadataModel', () => {
   return function() {
     return {}
   }
@@ -36,6 +43,9 @@ describe('dbHandler', () => {
     CredentialsModel.create = jest.fn()
     CredentialsModel.find = jest.fn().mockReturnValue([{}])
     CredentialsModel.findByIdAndUpdate = jest.fn()
+    UserMetadataModel.init = jest.fn()
+    UserMetadataModel.create = jest.fn()
+    UserMetadataModel.find = jest.fn().mockReturnValue([])
   })
 
   test('#getCredentials', async () => {
@@ -99,5 +109,38 @@ describe('dbHandler', () => {
 
     expect(CredentialsModel.init).toBeCalled()
     expect(CredentialsModel.create).toBeCalled()
+  })
+
+  test('#getUserMetadata (calls model.find)', async () => {
+    await dbHandler.getUserMetadata('FakeUser')
+
+    expect(UserMetadataModel.find).toBeCalledWith({ user: 'FakeUser' })
+  })
+
+  test('#getUserMetadata (no entries found)', async () => {
+    UserMetadataModel.find = jest.fn().mockResolvedValueOnce([])
+
+    const response = await dbHandler.getUserMetadata('FakeUser')
+
+    expect(response).toBe(undefined)
+  })
+
+  test('#getUserMetadata (entry found)', async () => {
+    UserMetadataModel.find = jest.fn().mockResolvedValueOnce([{
+      entryKey: 'entryValue',
+    }])
+
+    const response = await dbHandler.getUserMetadata('FakeUser')
+
+    expect(response).toStrictEqual({
+      entryKey: 'entryValue',
+    })
+  })
+
+  test('#addUserMetadata', async () => {
+    await dbHandler.addUserMetadata('FakeUser', 'FakePlatform')
+
+    expect(UserMetadataModel.init).toBeCalled()
+    expect(UserMetadataModel.create).toBeCalled()
   })
 })

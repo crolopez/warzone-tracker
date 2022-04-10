@@ -5,7 +5,7 @@ import { assertValidResponse, sendRequest, sendUserRequest } from './utils'
 
 class CoDAPIHandler {
   async IsValidSSO(allowedUser: string, ssoToken: string): Promise<boolean> {
-    const response = await sendRequest(ssoToken, IdentitiesRequest)
+    const response = await sendRequest(ssoToken, { route: IdentitiesRequest })
     assertValidResponse(response)
 
     const { titleIdentities } = response.data

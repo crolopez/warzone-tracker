@@ -5,14 +5,26 @@ import { versionCommand } from '../../../../../src/modules/telegramCommands/comm
 import { TelegramCommandDispatcher } from '../../../../../src/modules/telegramCommands/TelegramCommandDispatcher'
 
 jest.mock('../../../../../src/modules/commandDispatcher/CommandDispatcher')
+
 jest.mock('../../../../../src/modules/telegramCommands/commands/updateSSOCommand', () => {
   return {
     updateSSOCommand : jest.fn(),
   }
 })
+
 jest.mock('../../../../../src/modules/telegramCommands/commands/versionCommand', () => {
   return {
     versionCommand : jest.fn(),
+  }
+})
+
+jest.mock('../../../../../src/modules/configReader/configReader', () => {
+  return {
+    configReader: {
+      getConfig: jest.fn().mockReturnValue({
+        telegramBotToken: 'DUMMYTOKEN',
+      }),
+    },
   }
 })
 

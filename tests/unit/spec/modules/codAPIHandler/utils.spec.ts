@@ -2,9 +2,12 @@ import axios from 'axios'
 import { IdTypeVar, PlatformVar, UserTagVar } from '../../../../../src/modules/codAPIHandler/apiPaths'
 import { APIResponse } from '../../../../../src/modules/codAPIHandler/types/APIResponse'
 import { Platform } from '../../../../../src/modules/codAPIHandler/types/Platform'
-import { assertValidResponse, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
+import { assertValidResponse, sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
+import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
 
 jest.mock('axios')
+
+jest.mock('../../../../../src/modules/dbHandler/dbHandler')
 
 function getHeaders(sso: string): any {
   return {
@@ -16,9 +19,8 @@ function getHeaders(sso: string): any {
   }
 }
 
+const apiPath = 'https://my.callofduty.com/api/papi-client'
 function expectAxiosPostCalled(sso: string, userTag: string, platform: string, idType: string): void {
-  const apiPath = 'https://my.callofduty.com/api/papi-client'
-
   expect(axios.post)
     .toBeCalledWith(`${apiPath}/api/fake-route/${userTag}/${platform}/${idType}`,
       {}, getHeaders(sso))
@@ -44,6 +46,9 @@ describe('utils', () => {
     try {
       assertValidResponse({
         status: 'error',
+        requestProperties: {
+          route: 'FakeRoute',
+        },
         data: {
           message: 'Fake error',
         },
@@ -57,6 +62,7 @@ describe('utils', () => {
 
   test('#sendUserRequest (request is sent for all platforms)', async () => {
     axios.post = jest.fn()
+    dbHandler.getUserMetadata = jest.fn().mockResolvedValueOnce(undefined)
 
     await sendUserRequest(testSSO, testUser, testRoute)
 
@@ -65,6 +71,16 @@ describe('utils', () => {
     expectAxiosPostCalled(testSSO, testUserEncoded, Platform.Uno, 'id')
     expectAxiosPostCalled(testSSO, testUserEncoded, Platform.PSN, 'gamer')
     expectAxiosPostCalled(testSSO, testUserEncoded, Platform.XBOX, 'gamer')
+  })
+
+  test('#sendUserRequest (request is sent for the stored platform)', async () => {
+    dbHandler.getUserMetadata = jest.fn().mockResolvedValueOnce({
+      platform: 'Fake stored platform',
+    })
+
+    await sendUserRequest(testSSO, testUser, testRoute)
+
+    expectAxiosPostCalled(testSSO, testUserEncoded, 'Fake stored platform', 'gamer')
   })
 
   test('#sendUserRequest (user not found for any platform)', async () => {
@@ -76,6 +92,9 @@ describe('utils', () => {
 
     expect(response).toStrictEqual({
       status: 'error',
+      requestProperties: {
+        route: testRoute,
+      },
       data: {
         message: `Could not get the API response from ${testUser}`,
       },
@@ -95,5 +114,15 @@ describe('utils', () => {
     const response = await sendUserRequest(testSSO, testUser, testRoute)
 
     expect(response.data.message).toBe('Fake API Response')
+  })
+
+  test('#sendRequest', async () => {
+    axios.post = jest.fn().mockReturnValue({ data: {} })
+    dbHandler.getUserMetadata = jest.fn().mockResolvedValueOnce(undefined)
+
+    await sendRequest(testSSO, { route: 'FakeRoute' })
+
+    expect(axios.post).toBeCalledWith(`${apiPath}FakeRoute`,
+      {}, getHeaders(testSSO))
   })
 })

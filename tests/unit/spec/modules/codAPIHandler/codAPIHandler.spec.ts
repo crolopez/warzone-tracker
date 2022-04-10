@@ -18,6 +18,9 @@ describe('codAPIHandler', () => {
   test('#IsValidSSO (user is not allowed)', async () => {
     sendRequestMock.mockResolvedValueOnce({
       status: 'success',
+      requestProperties: {
+        route: testRoute,
+      },
       data: {
         message: '',
         titleIdentities: undefined,
@@ -32,6 +35,9 @@ describe('codAPIHandler', () => {
   test('#IsValidSSO (user is allowed)', async () => {
     sendRequestMock.mockResolvedValueOnce({
       status: 'success',
+      requestProperties: {
+        route: testRoute,
+      },
       data: {
         message: '',
         titleIdentities: [{
@@ -48,6 +54,9 @@ describe('codAPIHandler', () => {
   test('#GetLastMatch (no matches found)', async () => {
     sendUserRequestMock.mockResolvedValueOnce({
       status: 'success',
+      requestProperties: {
+        route: testRoute,
+      },
       data: {
         message: 'Fake error',
         titleIdentities: undefined,
@@ -66,6 +75,9 @@ describe('codAPIHandler', () => {
   test('#GetLastMatch (returns last match)', async () => {
     sendUserRequestMock.mockResolvedValueOnce({
       status: 'success',
+      requestProperties: {
+        route: testRoute,
+      },
       data: {
         message: '',
         matches: [
