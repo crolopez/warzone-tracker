@@ -21,7 +21,7 @@ describe('telegramFormatter', () => {
 
     expect(matchFormatted).toBe(
       '*//////////// Match ////////////*\n' +
-      '(1648740394)\n\n' +
+      '(Thu, 31 Mar 2022 15:26:34 GMT)\n\n' +
 
       '*Mode:* FakeMode\n' +
       '*Position:* 6\n' +

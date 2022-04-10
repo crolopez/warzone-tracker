@@ -3,7 +3,7 @@ import { Match } from '../codAPIHandler/types/Match'
 class TelegramFormatter {
   matchFormatter(match: Match): string  {
     return '*//////////// Match ////////////*\n' +
-      `(${match.utcStartSeconds})\n\n` +
+      `(${new Date(match.utcStartSeconds * 1000).toUTCString()})\n\n` +
       `*Mode:* ${match.mode}\n` +
       `*Position:* ${match.playerStats.teamPlacement}\n` +
       '*Lobby K/D:* ???\n\n' +
