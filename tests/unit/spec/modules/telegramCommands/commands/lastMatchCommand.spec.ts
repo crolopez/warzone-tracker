@@ -17,7 +17,7 @@ jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
 jest.mock('../../../../../../src/modules/codAPIHandler/codAPIHandler', () => {
   return {
     codAPIHandler: {
-      GetLastMatch: jest.fn(),
+      GetLastMatchInfo: jest.fn(),
     },
   }
 })
@@ -89,7 +89,7 @@ describe('LastMatchCommand', () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce({
       ssoToken: 'FakeToken',
     })
-    telegramFormatter.matchFormatter = jest.fn().mockReturnValueOnce('FormattedText')
+    telegramFormatter.matchReportFormatter = jest.fn().mockReturnValueOnce('FormattedText')
 
     await lastMatchCommand.handler(
       telegramCommandRequest,

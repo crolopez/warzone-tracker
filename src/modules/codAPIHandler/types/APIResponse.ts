@@ -1,4 +1,4 @@
-import { Match } from './Match'
+import { PlayerMatch } from './PlayerMatch'
 import { RequestProperties } from './RequestProperties'
 import { TitleIdentity } from './TitleIdentity'
 
@@ -9,6 +9,7 @@ export interface APIResponse {
     message: string
     type?: string
     titleIdentities?: TitleIdentity[]
-    matches?: Match[]
+    matches?: PlayerMatch[]
+    allPlayers?: PlayerMatch[]
   }
 }

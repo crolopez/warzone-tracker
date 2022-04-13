@@ -1,10 +1,10 @@
 import { codAPIHandler } from '../../../../../src/modules/codAPIHandler/codAPIHandler'
-import { Match } from '../../../../../src/modules/codAPIHandler/types/Match'
-import { sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
+import { PlayerMatch } from '../../../../../src/modules/codAPIHandler/types/PlayerMatch'
+import { sendRequest, getLastMatch } from '../../../../../src/modules/codAPIHandler/utils'
 
 jest.mock('../../../../../src/modules/codAPIHandler/utils')
 const sendRequestMock = sendRequest as jest.MockedFunction<typeof sendRequest>
-const sendUserRequestMock = sendUserRequest as jest.MockedFunction<typeof sendUserRequest>
+const getLastMatchMock = getLastMatch as jest.MockedFunction<typeof getLastMatch>
 
 describe('codAPIHandler', () => {
   const testUser = 'FakeUser#9812'
@@ -51,51 +51,25 @@ describe('codAPIHandler', () => {
     expect(response).toBe(true)
   })
 
-  test('#GetLastMatch (no matches found)', async () => {
-    sendUserRequestMock.mockResolvedValueOnce({
-      status: 'success',
-      requestProperties: {
-        route: testRoute,
-      },
-      data: {
-        message: 'Fake error',
-        titleIdentities: undefined,
-      },
-    })
-
-    try {
-      await codAPIHandler.GetLastMatch(testSSO, testUser)
-
-      expect(1).toBe(0)
-    } catch(error: any) {
-      expect(error.message).toBe('Fake error')
-    }
-  })
-
   test('#GetLastMatch (returns last match)', async () => {
-    sendUserRequestMock.mockResolvedValueOnce({
+    getLastMatchMock.mockResolvedValueOnce('LastMatchId')
+    sendRequestMock.mockResolvedValueOnce({
       status: 'success',
       requestProperties: {
         route: testRoute,
       },
       data: {
         message: '',
-        matches: [
+        allPlayers: [
           {
-            utcStartSeconds: 20,
+            map: 'FakeMap',
           },
-          {
-            utcStartSeconds: 30,
-          },
-          {
-            utcStartSeconds: 10,
-          },
-        ] as unknown as Match[],
+        ] as PlayerMatch[],
       },
     })
 
-    const response = await codAPIHandler.GetLastMatch(testSSO, testUser)
+    const response = await codAPIHandler.GetLastMatchInfo(testSSO, testUser)
 
-    expect(response.utcStartSeconds).toBe(30)
+    expect(response).toStrictEqual([ { map: 'FakeMap' } ])
   })
 })

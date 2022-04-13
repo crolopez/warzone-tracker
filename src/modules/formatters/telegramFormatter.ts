@@ -1,13 +1,22 @@
-import { Match } from '../codAPIHandler/types/Match'
+import { PlayerMatch } from '../codAPIHandler/types/PlayerMatch'
 
 class TelegramFormatter {
-  matchFormatter(match: Match): string  {
+  matchReportFormatter(players: PlayerMatch[], user: string): string  {
+    const mainPlayer = user.split('#')[0]
+    const mainPlayerInfo = players.filter(x => x.player.username == mainPlayer)[0]
+    const teamPlayersInfo = players.filter(x => x.player.team == mainPlayerInfo.player.team)
+
+    let playersReport = ''
+    teamPlayersInfo.forEach(player => {
+      playersReport += `*${player.player.username}* | *K:* ${player.playerStats.kills} | *K/D:* ${Number(player.playerStats.kdRatio).toFixed(2)}\n`
+    })
+
     return '*//////////// Match ////////////*\n' +
-      `(${new Date(match.utcStartSeconds * 1000).toUTCString()})\n\n` +
-      `*Mode:* ${match.mode}\n` +
-      `*Position:* ${match.playerStats.teamPlacement}\n` +
+      `(${new Date(mainPlayerInfo.utcStartSeconds * 1000).toUTCString()})\n\n` +
+      `*Mode:* ${mainPlayerInfo.mode}\n` +
+      `*Position:* ${mainPlayerInfo.playerStats.teamPlacement}\n` +
       '*Lobby K/D:* ???\n\n' +
-      `*${match.player.username}* | *K:* ${match.playerStats.kills} | *K/D:* ${Number(match.playerStats.kdRatio).toFixed(2)}`
+      `${playersReport}`
   }
 }
 

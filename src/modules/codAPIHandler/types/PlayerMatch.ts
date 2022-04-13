@@ -1,10 +1,11 @@
-export interface Match {
+export interface PlayerMatch {
   duration: number
   gameType: string
   map: string
   matchID: string
   mode: string
   player: {
+    team: string
     clantag: string
     username: string
   }

@@ -4,4 +4,5 @@ export interface RequestProperties {
   idType?: string
   userTag?: string
   encodedUserTag?: string,
+  matchId?: string,
 }

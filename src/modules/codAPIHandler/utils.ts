@@ -2,7 +2,7 @@ import axios from 'axios'
 import { APIResponse } from './types/APIResponse'
 import { Platform } from './types/Platform'
 import { RequestProperties } from './types/RequestProperties'
-import { IdTypeVar, PlatformVar, UserTagVar } from './apiPaths'
+import { IdTypeVar, MatchesRequest, MatchIdVar, PlatformVar, UserTagVar } from './apiPaths'
 import { dbHandler } from '../dbHandler/dbHandler'
 
 const codApi = 'https://my.callofduty.com/api/papi-client'
@@ -45,6 +45,7 @@ function getFinalRoute(requestProperties: RequestProperties): string {
     .replace(UserTagVar, requestProperties.encodedUserTag ?? '')
     .replace(PlatformVar, requestProperties.platform ?? '')
     .replace(IdTypeVar, requestProperties.idType ?? '')
+    .replace(MatchIdVar, requestProperties.matchId ?? '')
 }
 
 function getRequestForAllPlatforms(user: string, ssoToken: string, route: string): Promise<APIResponse>[] {
@@ -112,4 +113,18 @@ async function sendRequest(ssoToken:string, requestProperties: RequestProperties
   return { ... data, requestProperties: requestProperties }
 }
 
-export { sendRequest, sendUserRequest, assertValidResponse }
+async function getLastMatch(ssoToken: string, user: string): Promise<string> {
+  const response = await sendUserRequest(ssoToken, user, MatchesRequest)
+  assertValidResponse(response)
+
+  if (response.data.matches === undefined) {
+    throw new Error(response.data.message)
+  }
+
+  const lastMatch = response.data.matches
+    .sort((x, y) => y.utcStartSeconds - x.utcStartSeconds)[0]
+
+  return lastMatch.matchID
+}
+
+export { sendRequest, sendUserRequest, assertValidResponse, getLastMatch }
