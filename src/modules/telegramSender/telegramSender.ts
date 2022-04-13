@@ -5,7 +5,7 @@ const telegramAPI = 'https://api.telegram.org/bot'
 const botKey = configReader.getConfig().telegramBotToken
 
 class TelegramSender {
-  async send(chatId: number, text: string): Promise<string>  {
+  async send(chatId: number, text: string): Promise<any>  {
     const response = await axios.post(`${telegramAPI}${botKey}/sendMessage`,
       {
         chat_id: chatId,

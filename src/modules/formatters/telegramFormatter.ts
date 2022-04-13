@@ -1,4 +1,11 @@
 import { PlayerMatch } from '../codAPIHandler/types/PlayerMatch'
+import { gameModeDic } from './types/gameModeDic'
+
+function getGameMode(rawMode: string): string {
+  const mode = gameModeDic.get(rawMode)
+
+  return mode ?? rawMode.replace(/_/g, '\\_')
+}
 
 class TelegramFormatter {
   matchReportFormatter(players: PlayerMatch[], user: string): string  {
@@ -11,12 +18,12 @@ class TelegramFormatter {
       playersReport += `*${player.player.username}* | *K:* ${player.playerStats.kills} | *K/D:* ${Number(player.playerStats.kdRatio).toFixed(2)}\n`
     })
 
-    return '*//////////// Match ////////////*\n' +
-      `(${new Date(mainPlayerInfo.utcStartSeconds * 1000).toUTCString()})\n\n` +
-      `*Mode:* ${mainPlayerInfo.mode}\n` +
-      `*Position:* ${mainPlayerInfo.playerStats.teamPlacement}\n` +
-      '*Lobby K/D:* ???\n\n' +
-      `${playersReport}`
+    return `*//////////// Match ////////////*\n\
+(${new Date(mainPlayerInfo.utcStartSeconds * 1000).toUTCString()})\n\n\
+*Mode:* ${getGameMode(mainPlayerInfo.mode)}\n\
+*Position:* ${mainPlayerInfo.playerStats.teamPlacement}\n\
+*Lobby K/D:* ???\n\n\
+${playersReport}`
   }
 }
 
