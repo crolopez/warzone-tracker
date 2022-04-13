@@ -1,18 +1,26 @@
+const mockConnect = jest.fn()
+
 import mongoose from 'mongoose'
 import CredentialsModel from '../../../../../src/models/CredentialsModel'
+import UserMetadataModel from '../../../../../src/models/UserMetadataModel'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
 
 jest.mock('mongoose', () => {
   return {
-    connect: jest.fn(),
+    connect: mockConnect,
     connection: jest.fn(),
   }
 })
 
 jest.mock('../../../../../src/models/CredentialsModel', () => {
   return function() {
-    return {
-    }
+    return {}
+  }
+})
+
+jest.mock('../../../../../src/models/UserMetadataModel', () => {
+  return function() {
+    return {}
   }
 })
 
@@ -33,7 +41,11 @@ describe('dbHandler', () => {
     jest.clearAllMocks()
     CredentialsModel.init = jest.fn()
     CredentialsModel.create = jest.fn()
+    CredentialsModel.find = jest.fn().mockReturnValue([{}])
     CredentialsModel.findByIdAndUpdate = jest.fn()
+    UserMetadataModel.init = jest.fn()
+    UserMetadataModel.create = jest.fn()
+    UserMetadataModel.find = jest.fn().mockReturnValue([])
   })
 
   test('#getCredentials', async () => {
@@ -53,24 +65,35 @@ describe('dbHandler', () => {
   })
 
   test('#getCredentials (calls mongoose.connect)', async () => {
-    const connectSpy = jest.spyOn(mongoose, 'connect')
-
     await dbHandler.getCredentials()
 
-    expect(connectSpy).toBeCalled()
+    expect(mockConnect).toBeCalled()
   })
 
   test('#getCredentials (does not call mongoose.connect)', async () => {
     Object.defineProperty(mongoose.connection, 'host', {
-      value: jest.fn().mockReturnValue({
-        host: 'FakeHost',
-      }),
+      value: 'FakeHost',
+      configurable: true,
     })
-    const connectSpy = jest.spyOn(mongoose, 'connect')
 
     await dbHandler.getCredentials()
 
-    expect(connectSpy).toBeCalledTimes(0)
+    expect(mockConnect).toBeCalledTimes(0)
+  })
+
+  test('#getCredentials (mongoose.connect throws an error)', async () => {
+    Object.defineProperty(mongoose.connection, 'host', {
+      value: undefined,
+      configurable: true,
+    })
+    mongoose.connect = jest.fn().mockImplementation(() => {
+      throw new Error()
+    })
+    const processExitMock = jest.spyOn(process, 'exit').mockImplementation()
+
+    await dbHandler.getCredentials()
+
+    expect(processExitMock).toBeCalledTimes(1)
   })
 
   test('#updateCredentials', async () => {
@@ -88,12 +111,36 @@ describe('dbHandler', () => {
     expect(CredentialsModel.create).toBeCalled()
   })
 
-  test('#updateCredentials (credentials not found)', async () => {
-    CredentialsModel.find = jest.fn().mockResolvedValue([])
+  test('#getUserMetadata (calls model.find)', async () => {
+    await dbHandler.getUserMetadata('FakeUser')
 
-    await dbHandler.updateCredentials(testSSOToken)
+    expect(UserMetadataModel.find).toBeCalledWith({ user: 'FakeUser' })
+  })
 
-    expect(CredentialsModel.init).toBeCalled()
-    expect(CredentialsModel.create).toBeCalled()
+  test('#getUserMetadata (no entries found)', async () => {
+    UserMetadataModel.find = jest.fn().mockResolvedValueOnce([])
+
+    const response = await dbHandler.getUserMetadata('FakeUser')
+
+    expect(response).toBe(undefined)
+  })
+
+  test('#getUserMetadata (entry found)', async () => {
+    UserMetadataModel.find = jest.fn().mockResolvedValueOnce([{
+      entryKey: 'entryValue',
+    }])
+
+    const response = await dbHandler.getUserMetadata('FakeUser')
+
+    expect(response).toStrictEqual({
+      entryKey: 'entryValue',
+    })
+  })
+
+  test('#addUserMetadata', async () => {
+    await dbHandler.addUserMetadata('FakeUser', 'FakePlatform')
+
+    expect(UserMetadataModel.init).toBeCalled()
+    expect(UserMetadataModel.create).toBeCalled()
   })
 })

@@ -1,4 +1,5 @@
 import { CommandDispatcher } from '../commandDispatcher/CommandDispatcher'
+import { lastMatchCommand } from './commands/lastMatchCommand'
 import { updateSSOCommand } from './commands/updateSSOCommand'
 import { versionCommand } from './commands/versionCommand'
 
@@ -9,6 +10,7 @@ export class TelegramCommandDispatcher extends CommandDispatcher {
     super(commandRegex, [
       updateSSOCommand,
       versionCommand,
+      lastMatchCommand,
     ])
   }
 }

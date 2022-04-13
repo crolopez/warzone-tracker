@@ -1,7 +1,7 @@
 import type { APIGatewayProxyHandler } from 'aws-lambda/trigger/api-gateway-proxy'
 import { mapper } from './modules/mapper/mapper'
 import { TelegramCommandDispatcher } from './modules/telegramCommands/TelegramCommandDispatcher'
-import { telegramEventParser } from './modules/telegramEventParser/telegramEventParser'
+import { telegramEventParser } from './modules/parsers/telegramEventParser'
 
 const handle: APIGatewayProxyHandler = async (event: any) => {
   try {

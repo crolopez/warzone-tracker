@@ -1,5 +1,5 @@
-import { InvalidTelegramEvent } from '../../../../../src/modules/telegramEventParser/messages'
-import { telegramEventParser } from '../../../../../src/modules/telegramEventParser/telegramEventParser'
+import { InvalidTelegramEvent } from '../../../../../src/modules/parsers/messages'
+import { telegramEventParser } from '../../../../../src/modules/parsers/telegramEventParser'
 
 describe('telegramEventParser', () => {
   const telegramEvent = {

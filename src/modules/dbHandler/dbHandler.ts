@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
 import CredentialsModel from '../../models/CredentialsModel'
 import { CredentialsDoc } from '../../models/types/CredentialsDoc'
+import { UserMetadataDoc } from '../../models/types/UserMetadataDoc'
+import UserMetadataModel from '../../models/UserMetadataModel'
 import { configReader } from '../configReader/configReader'
 
 async function connectMongo(): Promise<void> {
@@ -36,6 +38,22 @@ class DbHandler {
     }
 
     await CredentialsModel.findByIdAndUpdate(credentials.id, credentialsEntry)
+  }
+
+  async getUserMetadata(user: string): Promise<UserMetadataDoc | undefined> {
+    await connectMongo()
+    const userMetadata = await UserMetadataModel.find({ user: user })
+    return userMetadata[0]
+  }
+
+  async addUserMetadata(user: string, platform: string): Promise<void> {
+    const userMetadataEntry = {
+      user: user,
+      platform: platform,
+    }
+
+    await UserMetadataModel.init()
+    await UserMetadataModel.create(new UserMetadataModel(userMetadataEntry))
   }
 }
 

@@ -1,5 +1,5 @@
 import { TelegramCommandRequest } from '../telegramCommands/types/TelegramCommandRequest'
-import { TelegramEvent } from '../telegramEventParser/types/TelegramEvent'
+import { TelegramEvent } from '../parsers/types/TelegramEvent'
 
 class Mapper {
   telegramEventToTelegramCommandRequest(event: TelegramEvent): TelegramCommandRequest | undefined {

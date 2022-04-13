@@ -1,65 +1,75 @@
-import axios from 'axios'
 import { codAPIHandler } from '../../../../../src/modules/codAPIHandler/codAPIHandler'
+import { PlayerMatch } from '../../../../../src/modules/codAPIHandler/types/PlayerMatch'
+import { sendRequest, getLastMatch } from '../../../../../src/modules/codAPIHandler/utils'
 
-jest.mock('axios')
+jest.mock('../../../../../src/modules/codAPIHandler/utils')
+const sendRequestMock = sendRequest as jest.MockedFunction<typeof sendRequest>
+const getLastMatchMock = getLastMatch as jest.MockedFunction<typeof getLastMatch>
 
 describe('codAPIHandler', () => {
-  const testUser = 'FakeUser'
+  const testUser = 'FakeUser#9812'
   const testSSO = 'FakeSSO'
+  const testRoute = '/api/fake-route'
 
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  test('#IsValidSSO (request failed)', async () => {
-    axios.post = jest.fn().mockResolvedValue(
-      {
-        data: {
-          status: 'Failed',
-          data: {
-            message: 'Invalid request',
-          },
-        },
-      })
-
-    try {
-      await codAPIHandler.IsValidSSO(testUser, testSSO)
-
-      expect(1).toBe(0)
-    } catch (error: any) {
-      expect(error.message).toBe('Invalid request')
-    }
-  })
-
   test('#IsValidSSO (user is not allowed)', async () => {
-    axios.post = jest.fn().mockResolvedValue(
-      {
-        data: {
-          status: 'success',
-          data: {
-            titleIdentities: [],
-          },
-        },
-      })
+    sendRequestMock.mockResolvedValueOnce({
+      status: 'success',
+      requestProperties: {
+        route: testRoute,
+      },
+      data: {
+        message: '',
+        titleIdentities: undefined,
+      },
+    })
 
-    const response = await codAPIHandler.IsValidSSO(testUser, testSSO)
+    const response = await codAPIHandler.IsValidSSO(testRoute, testSSO)
 
     expect(response).toBe(false)
   })
 
   test('#IsValidSSO (user is allowed)', async () => {
-    axios.post = jest.fn().mockResolvedValue(
-      {
-        data: {
-          status: 'success',
-          data: {
-            titleIdentities: [ { username: 'FakeUser' } ],
-          },
-        },
-      })
+    sendRequestMock.mockResolvedValueOnce({
+      status: 'success',
+      requestProperties: {
+        route: testRoute,
+      },
+      data: {
+        message: '',
+        titleIdentities: [{
+          username: 'FakeUser#9812',
+        }],
+      },
+    })
 
     const response = await codAPIHandler.IsValidSSO(testUser, testSSO)
 
     expect(response).toBe(true)
+  })
+
+  test('#GetLastMatch (returns last match)', async () => {
+    getLastMatchMock.mockResolvedValueOnce('LastMatchId')
+    sendRequestMock.mockResolvedValueOnce({
+      status: 'success',
+      requestProperties: {
+        route: testRoute,
+      },
+      data: {
+        message: '',
+        allPlayers: [
+          {
+            map: 'FakeMap',
+          },
+        ] as PlayerMatch[],
+      },
+    })
+
+    const response = await codAPIHandler.GetLastMatchInfo(testSSO, testUser)
+
+    expect(response).toStrictEqual([ { map: 'FakeMap' } ])
   })
 })
