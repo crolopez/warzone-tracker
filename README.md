@@ -43,3 +43,4 @@ These are the commands you can interact with using the Telegram bot.
 | `/UpdateSSO <SSO>` | Register a SSO to be able to use the bot |
 | `/Version` | Get the bot version |
 | `/LastMatch <User>` | Get user last match |
+| `/RegisterUserReports <User>` | Register user reports for the invoking channel  |

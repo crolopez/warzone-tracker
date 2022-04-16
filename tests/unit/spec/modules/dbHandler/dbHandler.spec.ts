@@ -3,6 +3,7 @@ const mockConnect = jest.fn()
 import mongoose from 'mongoose'
 import CredentialsModel from '../../../../../src/models/CredentialsModel'
 import UserMetadataModel from '../../../../../src/models/UserMetadataModel'
+import UserReportsModel from '../../../../../src/models/UserReportsModel'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
 
 jest.mock('mongoose', () => {
@@ -19,6 +20,12 @@ jest.mock('../../../../../src/models/CredentialsModel', () => {
 })
 
 jest.mock('../../../../../src/models/UserMetadataModel', () => {
+  return function() {
+    return {}
+  }
+})
+
+jest.mock('../../../../../src/models/UserReportsModel', () => {
   return function() {
     return {}
   }
@@ -46,6 +53,10 @@ describe('dbHandler', () => {
     UserMetadataModel.init = jest.fn()
     UserMetadataModel.create = jest.fn()
     UserMetadataModel.find = jest.fn().mockReturnValue([])
+    UserReportsModel.init = jest.fn()
+    UserReportsModel.create = jest.fn()
+    UserReportsModel.find = jest.fn().mockReturnValue([{}])
+    UserReportsModel.findByIdAndUpdate = jest.fn()
   })
 
   test('#getCredentials', async () => {
@@ -142,5 +153,64 @@ describe('dbHandler', () => {
 
     expect(UserMetadataModel.init).toBeCalled()
     expect(UserMetadataModel.create).toBeCalled()
+  })
+
+  test('#isUserRegistered', async () => {
+    UserReportsModel.find = jest.fn().mockResolvedValue([{
+      id: 56789,
+      channels: [
+        12345,
+      ],
+    }])
+
+    const response = await dbHandler.isUserRegistered('FakeUser', 12345)
+
+    expect(response).toBe(true)
+  })
+
+  test('#isUserRegistered (returns false)', async () => {
+    UserReportsModel.find = jest.fn().mockResolvedValue([{
+      id: 56789,
+      channels: [
+        12345,
+      ],
+    }])
+
+    const response = await dbHandler.isUserRegistered('FakeUser', 54321)
+
+    expect(response).toBe(false)
+  })
+
+  test('#getUserReports', async () => {
+    UserReportsModel.find = jest.fn().mockResolvedValue([{
+      id: 56789,
+      fakeKey: 'FakeValue',
+    }])
+
+    const response = await dbHandler.getUserReports('FakeUser')
+
+    expect(response).toStrictEqual({
+      id: 56789,
+      fakeKey: 'FakeValue',
+    })
+  })
+
+  test('#registerUserReports (user not registered in any channel)', async () => {
+    UserReportsModel.find = jest.fn().mockResolvedValue([])
+
+    await dbHandler.registerUserReports('FakeUser', 98765)
+
+    expect(UserReportsModel.init).toBeCalled()
+    expect(UserReportsModel.create).toBeCalled()
+  })
+
+  test('#registerUserReports (user is updated)', async () => {
+    UserReportsModel.find = jest.fn().mockResolvedValue([{
+      channels: [],
+    }])
+
+    await dbHandler.registerUserReports('FakeUser', 98765)
+
+    expect(UserReportsModel.findByIdAndUpdate).toBeCalled()
   })
 })

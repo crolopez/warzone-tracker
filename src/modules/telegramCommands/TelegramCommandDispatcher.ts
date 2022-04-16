@@ -1,5 +1,6 @@
 import { CommandDispatcher } from '../commandDispatcher/CommandDispatcher'
 import { lastMatchCommand } from './commands/lastMatchCommand'
+import { registerUserReportsCommand } from './commands/registerUserReportsCommand'
 import { updateSSOCommand } from './commands/updateSSOCommand'
 import { versionCommand } from './commands/versionCommand'
 
@@ -11,6 +12,7 @@ export class TelegramCommandDispatcher extends CommandDispatcher {
       updateSSOCommand,
       versionCommand,
       lastMatchCommand,
+      registerUserReportsCommand,
     ])
   }
 }
