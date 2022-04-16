@@ -9,4 +9,7 @@ export const MatchesRequest = '/crm/cod/v2/title/mw/platform/' +
 export const MatchPlayersRequest = '/crm/cod/v2/title/mw/platform/battle/fullMatch/wz/' +
   `${MatchIdVar}/it`
 
+export const UserInfoRequest = '/stats/cod/v1/title/mw/platform/' +
+  `${PlatformVar}/${IdTypeVar}/${UserTagVar}/profile/type/wz`
+
 export const IdentitiesRequest = '/crm/cod/v2/identities'

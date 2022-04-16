@@ -1,7 +1,8 @@
-import { IdentitiesRequest, MatchPlayersRequest } from './apiPaths'
+import { IdentitiesRequest, MatchPlayersRequest, UserInfoRequest } from './apiPaths'
+import { APIResponse } from './types/APIResponse'
 import { PlayerMatch } from './types/PlayerMatch'
 import { TitleIdentity } from './types/TitleIdentity'
-import { assertValidResponse, getLastMatch, sendRequest } from './utils'
+import { assertValidResponse, getLastMatch, sendRequest, sendUserRequest } from './utils'
 
 class CoDAPIHandler {
   async IsValidSSO(allowedUser: string, ssoToken: string): Promise<boolean> {
@@ -25,6 +26,12 @@ class CoDAPIHandler {
     assertValidResponse(lastMatchInfo)
 
     return lastMatchInfo.data.allPlayers as PlayerMatch[]
+  }
+
+  async GetUserSummary(user: string, sso: string): Promise<APIResponse> {
+    const response = await sendUserRequest(sso, user, UserInfoRequest)
+    assertValidResponse(response)
+    return response
   }
 }
 

@@ -2,7 +2,9 @@ import mongoose from 'mongoose'
 import CredentialsModel from '../../models/CredentialsModel'
 import { CredentialsDoc } from '../../models/types/CredentialsDoc'
 import { UserMetadataDoc } from '../../models/types/UserMetadataDoc'
+import { UserReportsDoc } from '../../models/types/UserReportsDoc'
 import UserMetadataModel from '../../models/UserMetadataModel'
+import UserReportsModel from '../../models/UserReportsModel'
 import { configReader } from '../configReader/configReader'
 
 async function connectMongo(): Promise<void> {
@@ -54,6 +56,44 @@ class DbHandler {
 
     await UserMetadataModel.init()
     await UserMetadataModel.create(new UserMetadataModel(userMetadataEntry))
+  }
+
+  async isUserRegistered(user: string, channel: number): Promise<boolean> {
+    await connectMongo()
+    const userReports = await this.getUserReports(user)
+    return userReports !== undefined
+      && userReports.channels.filter(x => x.valueOf() == channel)[0] !== undefined
+  }
+
+  async getUserReports(user: string): Promise<UserReportsDoc | undefined> {
+    await connectMongo()
+    const userReports = await UserReportsModel.find({ user: user })
+    return userReports[0]
+  }
+
+  async registerUserReports(user: string, chatId: number): Promise<void> {
+    const userReports = await this.getUserReports(user)
+    if (userReports === undefined) {
+      await UserReportsModel.init()
+      await UserReportsModel.create(new UserReportsModel({
+        user: user,
+        channels: [chatId],
+        lastMatch: '',
+        lastMatchTimestamp: 0,
+      }))
+      return
+    }
+
+    const updatedUserReports = {
+      user: userReports.user,
+      channels: [
+        ... userReports.channels,
+        chatId,
+      ],
+      lastMatch: userReports.lastMatch,
+      lastMatchTimestamp: userReports.lastMatchTimestamp,
+    }
+    await UserReportsModel.findByIdAndUpdate(userReports.id, updatedUserReports)
   }
 }
 
