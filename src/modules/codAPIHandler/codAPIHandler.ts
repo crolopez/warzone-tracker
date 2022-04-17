@@ -1,8 +1,8 @@
-import { IdentitiesRequest, MatchPlayersRequest, UserInfoRequest } from './apiPaths'
+import { IdentitiesRequest, MatchesRequest, MatchPlayersRequest, UserInfoRequest } from './apiPaths'
 import { APIResponse } from './types/APIResponse'
 import { PlayerMatch } from './types/PlayerMatch'
 import { TitleIdentity } from './types/TitleIdentity'
-import { assertValidResponse, getLastMatch, sendRequest, sendUserRequest } from './utils'
+import { assertValidResponse, sendRequest, sendUserRequest } from './utils'
 
 class CoDAPIHandler {
   async IsValidSSO(allowedUser: string, ssoToken: string): Promise<boolean> {
@@ -16,11 +16,24 @@ class CoDAPIHandler {
     return userEntries.length > 0
   }
 
-  async GetLastMatchInfo(sso: string, user: string): Promise<PlayerMatch[]> {
-    const lastMatch = await getLastMatch(sso, user)
+  async GetLastMatchId(ssoToken: string, user: string): Promise<string> {
+    const response = await sendUserRequest(ssoToken, user, MatchesRequest)
+    assertValidResponse(response)
+
+    if (response.data.matches === undefined) {
+      throw new Error(response.data.message)
+    }
+
+    const lastMatch = response.data.matches
+      .sort((x, y) => y.utcStartSeconds - x.utcStartSeconds)[0]
+
+    return lastMatch.matchID
+  }
+
+  async GetMatchInfo(sso: string, user: string, matchId: string): Promise<PlayerMatch[]> {
     const lastMatchInfo = await sendRequest(sso, {
       route: MatchPlayersRequest,
-      matchId: lastMatch,
+      matchId: matchId,
     })
 
     assertValidResponse(lastMatchInfo)

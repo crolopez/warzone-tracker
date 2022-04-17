@@ -113,18 +113,4 @@ async function sendRequest(ssoToken:string, requestProperties: RequestProperties
   return { ... data, requestProperties: requestProperties }
 }
 
-async function getLastMatch(ssoToken: string, user: string): Promise<string> {
-  const response = await sendUserRequest(ssoToken, user, MatchesRequest)
-  assertValidResponse(response)
-
-  if (response.data.matches === undefined) {
-    throw new Error(response.data.message)
-  }
-
-  const lastMatch = response.data.matches
-    .sort((x, y) => y.utcStartSeconds - x.utcStartSeconds)[0]
-
-  return lastMatch.matchID
-}
-
-export { sendRequest, sendUserRequest, assertValidResponse, getLastMatch }
+export { sendRequest, sendUserRequest, assertValidResponse }
