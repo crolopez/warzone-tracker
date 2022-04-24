@@ -2,6 +2,7 @@ const mockConnect = jest.fn()
 
 import mongoose from 'mongoose'
 import CredentialsModel from '../../../../../src/models/CredentialsModel'
+import { UserReportsDoc } from '../../../../../src/models/types/UserReportsDoc'
 import UserMetadataModel from '../../../../../src/models/UserMetadataModel'
 import UserReportsModel from '../../../../../src/models/UserReportsModel'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
@@ -43,6 +44,9 @@ describe('dbHandler', () => {
   const testId = 999999
   const testSSOToken = 'TEST:SSO-TOKEN'
   const testSSOTokenExpiryDate = 'TEST:SSO-TOKEN-EXPIRYDATE'
+  const testUserReport = {
+    id: 'FakeUserId',
+  } as UserReportsDoc
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -111,6 +115,23 @@ describe('dbHandler', () => {
     await dbHandler.updateCredentials(testSSOToken)
 
     expect(CredentialsModel.findByIdAndUpdate).toBeCalled()
+  })
+
+  test('#updateReports', async () => {
+    await dbHandler.updateReports(testUserReport, 'FakeMatchId', 989)
+
+    expect(UserReportsModel.findByIdAndUpdate).toBeCalledWith(testUserReport.id, {
+      lastMatch: 'FakeMatchId',
+      lastMatchTimestamp: 989,
+    })
+  })
+
+  test('#getReports', async () => {
+    UserReportsModel.find = jest.fn().mockResolvedValue([testUserReport])
+
+    const response = await dbHandler.getReports()
+
+    expect(response).toStrictEqual([testUserReport])
   })
 
   test('#updateCredentials (credentials not found)', async () => {
@@ -182,17 +203,11 @@ describe('dbHandler', () => {
   })
 
   test('#getUserReports', async () => {
-    UserReportsModel.find = jest.fn().mockResolvedValue([{
-      id: 56789,
-      fakeKey: 'FakeValue',
-    }])
+    UserReportsModel.find = jest.fn().mockResolvedValue([testUserReport])
 
     const response = await dbHandler.getUserReports('FakeUser')
 
-    expect(response).toStrictEqual({
-      id: 56789,
-      fakeKey: 'FakeValue',
-    })
+    expect(response).toStrictEqual(testUserReport)
   })
 
   test('#registerUserReports (user not registered in any channel)', async () => {

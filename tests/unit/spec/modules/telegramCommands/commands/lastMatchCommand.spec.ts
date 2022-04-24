@@ -17,7 +17,8 @@ jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
 jest.mock('../../../../../../src/modules/codAPIHandler/codAPIHandler', () => {
   return {
     codAPIHandler: {
-      GetLastMatchInfo: jest.fn(),
+      GetLastMatchId: jest.fn(),
+      GetMatchInfo: jest.fn(),
     },
   }
 })
@@ -39,7 +40,7 @@ jest.mock('../../../../../../src/modules/dbHandler/dbHandler', () => {
   }
 })
 
-describe('LastMatchCommand', () => {
+describe('lastMatchCommand', () => {
   const testChatId = 98765
   const telegramCommandRequest = {
     command: '/FakeCommand',

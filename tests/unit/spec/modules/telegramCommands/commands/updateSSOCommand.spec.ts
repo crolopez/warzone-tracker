@@ -29,7 +29,7 @@ jest.mock('../../../../../../src/modules/configReader/configReader', () => {
   }
 })
 
-describe('UpdateSSOCommand', () => {
+describe('updateSSOCommand', () => {
   const telegramCommandRequest = {
     command: '/FakeCommand',
     source: {

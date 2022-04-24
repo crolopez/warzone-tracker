@@ -12,16 +12,16 @@ async function processTelegramEvent(event: any): Promise<any> {
     : 'Unprocessed message'
 }
 
-async function processScheduledEvent(): Promise<any> {
-  const commandRequest = { command: '/ReportLastMatches' }
+async function processScheduledEvent(event: { scheduleCommand: string }): Promise<any> {
+  const commandRequest = { command: event.scheduleCommand }
   return await new ScheduledCommandDispatcher().dispatch(commandRequest)
 }
 
 const handle: APIGatewayProxyHandler = async (event: any): Promise<any> => {
   try {
-    const response = event.functionEventType == 'telegram'
+    const response = event.scheduleCommand == undefined
       ? await processTelegramEvent(event)
-      : await processScheduledEvent()
+      : await processScheduledEvent(event)
     return {
       body: JSON.stringify(response),
       statusCode: 200,
