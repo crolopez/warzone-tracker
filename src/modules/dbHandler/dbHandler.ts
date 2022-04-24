@@ -65,6 +65,20 @@ class DbHandler {
       && userReports.channels.filter(x => x.valueOf() == channel)[0] !== undefined
   }
 
+  async updateReports(report: UserReportsDoc, lastMatch: string, lastMatchTimestamp: number): Promise<void> {
+    const updatedUserReports = {
+      lastMatch: lastMatch,
+      lastMatchTimestamp: lastMatchTimestamp,
+    }
+    await UserReportsModel.findByIdAndUpdate(report.id, updatedUserReports)
+  }
+
+  async getReports(): Promise<UserReportsDoc[]> {
+    await connectMongo()
+    const userReports = await UserReportsModel.find()
+    return userReports
+  }
+
   async getUserReports(user: string): Promise<UserReportsDoc | undefined> {
     await connectMongo()
     const userReports = await UserReportsModel.find({ user: user })

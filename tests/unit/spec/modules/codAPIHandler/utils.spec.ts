@@ -2,8 +2,7 @@ import axios from 'axios'
 import { IdTypeVar, MatchIdVar, PlatformVar, UserTagVar } from '../../../../../src/modules/codAPIHandler/apiPaths'
 import { APIResponse } from '../../../../../src/modules/codAPIHandler/types/APIResponse'
 import { Platform } from '../../../../../src/modules/codAPIHandler/types/Platform'
-import { PlayerMatch } from '../../../../../src/modules/codAPIHandler/types/PlayerMatch'
-import { assertValidResponse, getLastMatch, sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
+import { assertValidResponse, sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
 
 jest.mock('axios')
@@ -125,92 +124,5 @@ describe('utils', () => {
 
     expect(axios.post).toBeCalledWith(`${apiPath}FakeRoute`,
       {}, getHeaders(testSSO))
-  })
-
-  test('#GetLastMatch (no matches found)', async () => {
-    axios.post = jest.fn().mockResolvedValueOnce({
-      data: {
-        data: {
-          status: 'success',
-          requestProperties: {
-            route: testRoute,
-          },
-          data: {
-            message: 'Fake error',
-          },
-        },
-      },
-    })
-
-    try {
-      await getLastMatch(testSSO, testUser)
-
-      expect(1).toBe(0)
-    } catch(error: any) {
-      expect(error.message).toBe('Could not get the API response from FakeUser#8287')
-    }
-  })
-
-  test('#GetLastMatch (returns last match)', async () => {
-    dbHandler.getUserMetadata = jest.fn().mockResolvedValueOnce({
-      platform: 'Fake stored platform',
-    })
-    axios.post = jest.fn().mockResolvedValueOnce({
-      data: {
-        status: 'success',
-        requestProperties: {
-          route: testRoute,
-          matchId: 'Test Match',
-        },
-        data: {
-          message: '',
-          matches: [
-            {
-              utcStartSeconds: 20,
-              matchID: '123',
-            },
-            {
-              utcStartSeconds: 30,
-              matchID: '456',
-            },
-            {
-              utcStartSeconds: 10,
-              matchID: '678',
-            },
-          ] as unknown as PlayerMatch[],
-        },
-      },
-    })
-
-    const response = await getLastMatch(testSSO, testUser)
-
-    expect(response).toBe('456')
-  })
-
-  test('#GetLastMatch (unexpected match response)', async () => {
-    dbHandler.getUserMetadata = jest.fn().mockResolvedValueOnce({
-      platform: 'Fake stored platform',
-    })
-    axios.post = jest.fn().mockResolvedValueOnce({
-      data: {
-        status: 'success',
-        requestProperties: {
-          route: testRoute,
-          matchId: 'Test Match',
-        },
-        data: {
-          message: 'Fake test message',
-          matches: undefined,
-        },
-      },
-    })
-
-    try {
-      await getLastMatch(testSSO, testUser)
-
-      expect(1).toBe(0)
-    } catch(error: any) {
-      expect(error.message).toBe('Fake test message')
-    }
   })
 })

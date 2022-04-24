@@ -35,3 +35,8 @@ functions:
           path: warzone-tracker
           method: post
           cors: true
+      - schedule:
+          rate: rate(1 minute)
+          enabled: true
+          input:
+            scheduleCommand: '/ReportLastMatches'
