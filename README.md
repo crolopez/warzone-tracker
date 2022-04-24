@@ -44,3 +44,19 @@ These are the commands you can interact with using the Telegram bot.
 | `/Version` | Get the bot version |
 | `/LastMatch <User>` | Get user last match |
 | `/RegisterUserReports <User>` | Register user reports for the invoking channel  |
+
+## Scheduled reports
+
+Scheduled reports are events that are launched every X amount of time to perform periodic activities and their activation depends on the serverless platform where this project is deployed.
+
+The project is tested on AWS Lambda functions, but could be adapted to other types of serverless platforms by modifying the recipe for deployment without changing production code.
+
+### Post-match results
+
+It is possible to receive the results of a match as soon as it is over on the desired channels.
+
+To do this, we must first register the user whose post-match results we want to receive using the `/RegisterUserReports <User>` command from one or more groups.
+
+If we want to disable this functionality we just need to remove the `schedule` block corresponding to the `/ReportLastMatches` command from [serverless.yml](./serverless.yml).
+
+To modify the frequency for checking if there is new information of finished matches just modify the `rate` attribute.
