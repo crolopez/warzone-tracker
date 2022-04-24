@@ -42,7 +42,7 @@ describe('updateSSOCommand', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    codAPIHandler.IsValidSSO = jest.fn().mockResolvedValue(true)
+    codAPIHandler.isValidSSO = jest.fn().mockResolvedValue(true)
   })
 
   test('#validate (returns ok)', async () => {
@@ -81,7 +81,7 @@ describe('updateSSOCommand', () => {
   })
 
   test('#handler (invalid SSO)', async () => {
-    codAPIHandler.IsValidSSO = jest.fn().mockResolvedValue(false)
+    codAPIHandler.isValidSSO = jest.fn().mockResolvedValue(false)
 
     const response = await updateSSOCommand.handler(telegramCommandRequest, [])
 

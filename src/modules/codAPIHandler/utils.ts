@@ -2,7 +2,7 @@ import axios from 'axios'
 import { APIResponse } from './types/APIResponse'
 import { Platform } from './types/Platform'
 import { RequestProperties } from './types/RequestProperties'
-import { IdTypeVar, MatchesRequest, MatchIdVar, PlatformVar, UserTagVar } from './apiPaths'
+import { IdTypeVar, MatchIdVar, PlatformVar, UserTagVar } from './apiPaths'
 import { dbHandler } from '../dbHandler/dbHandler'
 
 const codApi = 'https://my.callofduty.com/api/papi-client'

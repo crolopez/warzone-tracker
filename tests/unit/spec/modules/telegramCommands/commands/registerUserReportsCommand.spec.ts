@@ -76,7 +76,7 @@ describe('registerUserReportsCommand', () => {
   test('#handler (invalid user)', async () => {
     dbHandler.isUserRegistered = jest.fn().mockResolvedValueOnce(false)
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce('FakeSSO')
-    codAPIHandler.GetUserSummary = jest.fn().mockResolvedValueOnce(undefined)
+    codAPIHandler.getUserSummary = jest.fn().mockResolvedValueOnce(undefined)
 
     const response = await registerUserReportsCommand.handler(
       telegramCommandRequest, [ '', '', 'FakeUser' ])
@@ -90,7 +90,7 @@ describe('registerUserReportsCommand', () => {
   test('#handler', async () => {
     dbHandler.isUserRegistered = jest.fn().mockResolvedValueOnce(false)
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce('FakeSSO')
-    codAPIHandler.GetUserSummary = jest.fn().mockResolvedValueOnce({
+    codAPIHandler.getUserSummary = jest.fn().mockResolvedValueOnce({
       data: {
         username: 'FakeUser',
       },

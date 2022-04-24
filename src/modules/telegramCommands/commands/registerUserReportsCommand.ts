@@ -27,7 +27,7 @@ const register = async (commandRequest: CommandRequest, args: string[]): Promise
   }
 
   const ssoToken = sso.ssoToken as unknown as string
-  const userSummary = await codAPIHandler.GetUserSummary(user, ssoToken)
+  const userSummary = await codAPIHandler.getUserSummary(user, ssoToken)
   if (userSummary === undefined) {
     return {
       response: InvalidUser,

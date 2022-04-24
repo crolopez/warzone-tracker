@@ -12,7 +12,7 @@ const updateSSO = async (commandRequest: CommandRequest, args: string[]): Promis
   const ssoToken = args[2]
   const allowedUser = configReader.getConfig().acceptSSOFrom
 
-  if (!await codAPIHandler.IsValidSSO(allowedUser, ssoToken)) {
+  if (!await codAPIHandler.isValidSSO(allowedUser, ssoToken)) {
     return {
       response: InvalidSSOTokenUser,
       success: false,

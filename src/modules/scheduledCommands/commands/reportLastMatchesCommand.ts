@@ -32,14 +32,14 @@ const reportLastMatches = async (commandRequest: CommandRequest, args: string[])
   const promises = Array.from(reports, async report => {
     const user = report.user.valueOf() as string
     const lastReportedMatchId = report.lastMatch.valueOf() as string
-    const lastMatchId = await codAPIHandler.GetLastMatchId(ssoToken, user)
+    const lastMatchId = await codAPIHandler.getLastMatchId(ssoToken, user)
 
     if (lastReportedMatchId == lastMatchId) {
       console.log(`Match ${lastMatchId} already reported for ${user}`)
       return
     }
 
-    const matchInfo = await codAPIHandler.GetMatchInfo(ssoToken, user, lastMatchId)
+    const matchInfo = await codAPIHandler.getMatchInfo(ssoToken, user, lastMatchId)
     const lastMatchTimestamp = matchInfo[0].utcStartSeconds
     await dbHandler.updateReports(report, lastMatchId, lastMatchTimestamp)
 

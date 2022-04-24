@@ -5,7 +5,7 @@ import { TitleIdentity } from './types/TitleIdentity'
 import { assertValidResponse, sendRequest, sendUserRequest } from './utils'
 
 class CoDAPIHandler {
-  async IsValidSSO(allowedUser: string, ssoToken: string): Promise<boolean> {
+  async isValidSSO(allowedUser: string, ssoToken: string): Promise<boolean> {
     const response = await sendRequest(ssoToken, { route: IdentitiesRequest })
     assertValidResponse(response)
 
@@ -16,7 +16,7 @@ class CoDAPIHandler {
     return userEntries.length > 0
   }
 
-  async GetLastMatchId(ssoToken: string, user: string): Promise<string> {
+  async getLastMatchId(ssoToken: string, user: string): Promise<string> {
     const response = await sendUserRequest(ssoToken, user, MatchesRequest)
     assertValidResponse(response)
 
@@ -30,7 +30,7 @@ class CoDAPIHandler {
     return lastMatch.matchID
   }
 
-  async GetMatchInfo(sso: string, user: string, matchId: string): Promise<PlayerMatch[]> {
+  async getMatchInfo(sso: string, user: string, matchId: string): Promise<PlayerMatch[]> {
     const lastMatchInfo = await sendRequest(sso, {
       route: MatchPlayersRequest,
       matchId: matchId,
@@ -41,7 +41,7 @@ class CoDAPIHandler {
     return lastMatchInfo.data.allPlayers as PlayerMatch[]
   }
 
-  async GetUserSummary(user: string, sso: string): Promise<APIResponse> {
+  async getUserSummary(user: string, sso: string): Promise<APIResponse> {
     const response = await sendUserRequest(sso, user, UserInfoRequest)
     assertValidResponse(response)
     return response

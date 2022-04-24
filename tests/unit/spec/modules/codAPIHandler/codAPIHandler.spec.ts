@@ -17,7 +17,7 @@ describe('codAPIHandler', () => {
     jest.clearAllMocks()
   })
 
-  test('#IsValidSSO (user is not allowed)', async () => {
+  test('#isValidSSO (user is not allowed)', async () => {
     sendRequestMock.mockResolvedValueOnce({
       status: 'success',
       requestProperties: {
@@ -29,12 +29,12 @@ describe('codAPIHandler', () => {
       },
     })
 
-    const response = await codAPIHandler.IsValidSSO(testRoute, testSSO)
+    const response = await codAPIHandler.isValidSSO(testRoute, testSSO)
 
     expect(response).toBe(false)
   })
 
-  test('#IsValidSSO (user is allowed)', async () => {
+  test('#isValidSSO (user is allowed)', async () => {
     sendRequestMock.mockResolvedValueOnce({
       status: 'success',
       requestProperties: {
@@ -48,12 +48,12 @@ describe('codAPIHandler', () => {
       },
     })
 
-    const response = await codAPIHandler.IsValidSSO(testUser, testSSO)
+    const response = await codAPIHandler.isValidSSO(testUser, testSSO)
 
     expect(response).toBe(true)
   })
 
-  test('#GetMatchInfo (returns last match)', async () => {
+  test('#getMatchInfo (returns last match)', async () => {
     sendRequestMock.mockResolvedValueOnce({
       status: 'success',
       requestProperties: {
@@ -69,18 +69,18 @@ describe('codAPIHandler', () => {
       },
     })
 
-    const response = await codAPIHandler.GetMatchInfo(testSSO, testUser, 'LastMatchId')
+    const response = await codAPIHandler.getMatchInfo(testSSO, testUser, 'LastMatchId')
 
     expect(response).toStrictEqual([ { map: 'FakeMap' } ])
   })
 
-  test('#GetUserSummary', async () => {
+  test('#getUserSummary', async () => {
     sendUserRequestMock.mockResolvedValueOnce({
       status: 'success',
       fakeKey: 'fakeValue',
     } as unknown as APIResponse)
 
-    const response = await codAPIHandler.GetUserSummary(testSSO, testUser)
+    const response = await codAPIHandler.getUserSummary(testSSO, testUser)
 
     expect(response).toStrictEqual({
       status: 'success',
@@ -88,7 +88,7 @@ describe('codAPIHandler', () => {
     })
   })
 
-  test('#GetLastMatchId (returns last match)', async () => {
+  test('#getLastMatchId (returns last match)', async () => {
     sendUserRequestMock.mockResolvedValueOnce({
       status: 'success',
       data: {
@@ -109,12 +109,12 @@ describe('codAPIHandler', () => {
       },
     } as unknown as APIResponse)
 
-    const response = await codAPIHandler.GetLastMatchId(testSSO, testUser)
+    const response = await codAPIHandler.getLastMatchId(testSSO, testUser)
 
     expect(response).toBe('456')
   })
 
-  test('#GetLastMatchId (no matches found)', async () => {
+  test('#getLastMatchId (no matches found)', async () => {
     sendUserRequestMock.mockResolvedValueOnce({
       status: 'success',
       data: {
@@ -124,7 +124,7 @@ describe('codAPIHandler', () => {
     } as unknown as APIResponse)
 
     try {
-      await codAPIHandler.GetLastMatchId(testSSO, testUser)
+      await codAPIHandler.getLastMatchId(testSSO, testUser)
 
       expect(1).toBe(0)
     } catch(error: any) {
