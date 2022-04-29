@@ -1,5 +1,6 @@
 const mockSend = jest.fn()
 
+import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAPIHandler'
 import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { telegramFormatter } from '../../../../../../src/modules/formatters/telegramFormatter'
 import { lastMatchCommand } from '../../../../../../src/modules/telegramCommands/commands/lastMatchCommand'
@@ -14,14 +15,7 @@ jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
   }
 })
 
-jest.mock('../../../../../../src/modules/codAPIHandler/codAPIHandler', () => {
-  return {
-    codAPIHandler: {
-      getLastMatchesIdFrom: jest.fn().mockReturnValue([]),
-      getMatchInfo: jest.fn(),
-    },
-  }
-})
+jest.mock('../../../../../../src/modules/codAPIHandler/CodAPIHandler')
 
 jest.mock('../../../../../../src/modules/formatters/telegramFormatter', () => {
   return {
@@ -54,6 +48,8 @@ describe('lastMatchCommand', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockReturnValue([])
+    CodAPIHandler.prototype.getMatchInfo = jest.fn()
   })
 
   test('#validate (returns ok)', async () => {

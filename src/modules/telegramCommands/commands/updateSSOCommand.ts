@@ -1,4 +1,4 @@
-import { codAPIHandler } from '../../codAPIHandler/codAPIHandler'
+import { CodAPIHandler } from '../../codAPIHandler/CodAPIHandler'
 import { Command } from '../../commandDispatcher/types/Command'
 import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
@@ -12,7 +12,8 @@ const updateSSO = async (commandRequest: CommandRequest, args: string[]): Promis
   const ssoToken = args[2]
   const allowedUser = configReader.getConfig().acceptSSOFrom
 
-  if (!await codAPIHandler.isValidSSO(allowedUser, ssoToken)) {
+  const codAPIHandler = new CodAPIHandler(ssoToken)
+  if (!await codAPIHandler.isValidSSO(allowedUser)) {
     return {
       response: InvalidSSOTokenUser,
       success: false,

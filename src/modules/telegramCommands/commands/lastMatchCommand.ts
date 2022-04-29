@@ -1,4 +1,4 @@
-import { codAPIHandler } from '../../codAPIHandler/codAPIHandler'
+import { CodAPIHandler } from '../../codAPIHandler/CodAPIHandler'
 import { Command } from '../../commandDispatcher/types/Command'
 import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
@@ -19,9 +19,9 @@ const lastMatch = async (commandRequest: CommandRequest, args: string[]): Promis
     }
   }
 
-  const ssoToken = sso.ssoToken as unknown as string
-  const lastMatchId = await codAPIHandler.getLastMatchesIdFrom(ssoToken, user)
-  const matchInfo = await codAPIHandler.getMatchInfo(ssoToken, user, lastMatchId[0])
+  const codAPIHandler = new CodAPIHandler(sso.ssoToken as unknown as string)
+  const lastMatchId = await codAPIHandler.getLastMatchesIdFrom(user)
+  const matchInfo = await codAPIHandler.getMatchInfo(user, lastMatchId[0])
   const formattedMatchReport = telegramFormatter.matchReportFormatter(matchInfo, user)
 
   const request = commandRequest as TelegramCommandRequest

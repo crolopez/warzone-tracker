@@ -1,8 +1,9 @@
-import { codAPIHandler } from '../../codAPIHandler/codAPIHandler'
+import { CodAPIHandler } from '../../codAPIHandler/CodAPIHandler'
 import { PlayerMatch } from '../../codAPIHandler/types/PlayerMatch'
 import { Command } from '../../commandDispatcher/types/Command'
 import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
+import { configReader } from '../../configReader/configReader'
 import { dbHandler } from '../../dbHandler/dbHandler'
 import { telegramFormatter } from '../../formatters/telegramFormatter'
 import { telegramSender } from '../../telegramSender/telegramSender'
@@ -33,21 +34,24 @@ const reportLastMatches = async (commandRequest: CommandRequest, args: string[])
     }
   }
 
-  const ssoToken = sso.ssoToken as unknown as string
+  const codAPIHandler = new CodAPIHandler(sso.ssoToken as unknown as string)
   const reports = await dbHandler.getReports()
+  const maxReportsPerUser = configReader.getConfig().maxReportsPerUser
+
   const reportsSentForAllUser = Array.from(reports, async report => {
     const user = report.user.valueOf() as string
     const channels = report.channels.valueOf() as number[]
-    const lastReportedMatchId = report.lastMatch.valueOf() as string
-    const lastMatches = await codAPIHandler.getLastMatchesIdFrom(ssoToken, user, lastReportedMatchId)
+    const lastReportedId = report.lastMatch.valueOf() as string
+    const lastReportedTimestamp = report.lastMatchTimestamp.valueOf() as number
 
+    const lastMatches = await codAPIHandler.getLastMatchesIdFrom(user, lastReportedTimestamp)
     if (lastMatches.length == 0) {
-      console.log(`Match ${lastReportedMatchId} already reported for ${user}`)
+      console.log(`Match ${lastReportedId} already reported for ${user}`)
       return
     }
 
-    const playerMatchesInfo = Array.from(lastMatches.slice(0, 5), async matchId => {
-      return await codAPIHandler.getMatchInfo(ssoToken, user, matchId)
+    const playerMatchesInfo = Array.from(lastMatches.slice(0, maxReportsPerUser), async matchId => {
+      return await codAPIHandler.getMatchInfo(user, matchId)
     })
 
     await Promise.allSettled(playerMatchesInfo)

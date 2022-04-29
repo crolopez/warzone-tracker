@@ -1,4 +1,4 @@
-import { codAPIHandler } from '../../../../../../src/modules/codAPIHandler/codAPIHandler'
+import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAPIHandler'
 import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { registerUserReportsCommand } from '../../../../../../src/modules/telegramCommands/commands/registerUserReportsCommand'
 import { InvalidUser, MissingSSOToken, UserRegisteredForChannel } from '../../../../../../src/modules/telegramCommands/messages'
@@ -76,7 +76,7 @@ describe('registerUserReportsCommand', () => {
   test('#handler (invalid user)', async () => {
     dbHandler.isUserRegistered = jest.fn().mockResolvedValueOnce(false)
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce('FakeSSO')
-    codAPIHandler.getUserSummary = jest.fn().mockResolvedValueOnce(undefined)
+    CodAPIHandler.prototype.getUserSummary = jest.fn().mockResolvedValueOnce(undefined)
 
     const response = await registerUserReportsCommand.handler(
       telegramCommandRequest, [ '', '', 'FakeUser' ])
@@ -90,7 +90,7 @@ describe('registerUserReportsCommand', () => {
   test('#handler', async () => {
     dbHandler.isUserRegistered = jest.fn().mockResolvedValueOnce(false)
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce('FakeSSO')
-    codAPIHandler.getUserSummary = jest.fn().mockResolvedValueOnce({
+    CodAPIHandler.prototype.getUserSummary = jest.fn().mockResolvedValueOnce({
       data: {
         username: 'FakeUser',
       },

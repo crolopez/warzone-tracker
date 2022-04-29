@@ -1,4 +1,4 @@
-import { codAPIHandler } from '../../../../../../src/modules/codAPIHandler/codAPIHandler'
+import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAPIHandler'
 import { updateSSOCommand } from '../../../../../../src/modules/telegramCommands/commands/updateSSOCommand'
 import { InvalidSSOTokenUser } from '../../../../../../src/modules/telegramCommands/messages'
 import { telegramSender } from '../../../../../../src/modules/telegramSender/telegramSender'
@@ -11,7 +11,7 @@ jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
   }
 })
 
-jest.mock('../../../../../../src/modules/codAPIHandler/codAPIHandler')
+jest.mock('../../../../../../src/modules/codAPIHandler/CodAPIHandler')
 
 jest.mock('../../../../../../src/modules/dbHandler/dbHandler', () => {
   return {
@@ -42,7 +42,7 @@ describe('updateSSOCommand', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    codAPIHandler.isValidSSO = jest.fn().mockResolvedValue(true)
+    CodAPIHandler.prototype.isValidSSO = jest.fn().mockResolvedValue(true)
   })
 
   test('#validate (returns ok)', async () => {
@@ -81,7 +81,7 @@ describe('updateSSOCommand', () => {
   })
 
   test('#handler (invalid SSO)', async () => {
-    codAPIHandler.isValidSSO = jest.fn().mockResolvedValue(false)
+    CodAPIHandler.prototype.isValidSSO = jest.fn().mockResolvedValue(false)
 
     const response = await updateSSOCommand.handler(telegramCommandRequest, [])
 

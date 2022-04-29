@@ -1,4 +1,4 @@
-import { codAPIHandler } from '../../../../../src/modules/codAPIHandler/codAPIHandler'
+import { CodAPIHandler } from '../../../../../src/modules/codAPIHandler/CodAPIHandler'
 import { APIResponse } from '../../../../../src/modules/codAPIHandler/types/APIResponse'
 import { PlayerMatch } from '../../../../../src/modules/codAPIHandler/types/PlayerMatch'
 import { sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
@@ -28,7 +28,7 @@ describe('codAPIHandler', () => {
       },
     })
 
-    const response = await codAPIHandler.isValidSSO(testRoute, testSSO)
+    const response = await new CodAPIHandler(testSSO).isValidSSO(testRoute)
 
     expect(response).toBe(false)
   })
@@ -47,7 +47,7 @@ describe('codAPIHandler', () => {
       },
     })
 
-    const response = await codAPIHandler.isValidSSO(testUser, testSSO)
+    const response = await new CodAPIHandler(testSSO).isValidSSO(testUser)
 
     expect(response).toBe(true)
   })
@@ -68,7 +68,7 @@ describe('codAPIHandler', () => {
       },
     })
 
-    const response = await codAPIHandler.getMatchInfo(testSSO, testUser, 'LastMatchId')
+    const response = await new CodAPIHandler(testSSO).getMatchInfo(testUser, 'LastMatchId')
 
     expect(response).toStrictEqual([ { map: 'FakeMap' } ])
   })
@@ -79,7 +79,7 @@ describe('codAPIHandler', () => {
       fakeKey: 'fakeValue',
     } as unknown as APIResponse)
 
-    const response = await codAPIHandler.getUserSummary(testSSO, testUser)
+    const response = await new CodAPIHandler(testSSO).getUserSummary(testUser)
 
     expect(response).toStrictEqual({
       status: 'success',
@@ -112,7 +112,7 @@ describe('codAPIHandler', () => {
       },
     } as unknown as APIResponse)
 
-    const response = await codAPIHandler.getLastMatchesIdFrom(testSSO, testUser, '123')
+    const response = await new CodAPIHandler(testSSO).getLastMatchesIdFrom(testUser, 20)
 
     expect(response).toStrictEqual([ '910', '456'] )
   })
@@ -127,7 +127,7 @@ describe('codAPIHandler', () => {
     } as unknown as APIResponse)
 
     try {
-      await codAPIHandler.getLastMatchesIdFrom(testSSO, testUser)
+      await new CodAPIHandler(testSSO).getLastMatchesIdFrom(testUser)
 
       expect(1).toBe(0)
     } catch(error: any) {

@@ -1,4 +1,4 @@
-import { codAPIHandler } from '../../codAPIHandler/codAPIHandler'
+import { CodAPIHandler } from '../../codAPIHandler/CodAPIHandler'
 import { Command } from '../../commandDispatcher/types/Command'
 import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
@@ -26,8 +26,8 @@ const register = async (commandRequest: CommandRequest, args: string[]): Promise
     }
   }
 
-  const ssoToken = sso.ssoToken as unknown as string
-  const userSummary = await codAPIHandler.getUserSummary(user, ssoToken)
+  const codAPIHandler = new CodAPIHandler(sso.ssoToken as unknown as string)
+  const userSummary = await codAPIHandler.getUserSummary(user)
   if (userSummary === undefined) {
     return {
       response: InvalidUser,
