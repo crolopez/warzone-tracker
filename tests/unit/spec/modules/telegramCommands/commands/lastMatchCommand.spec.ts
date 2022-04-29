@@ -17,7 +17,7 @@ jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
 jest.mock('../../../../../../src/modules/codAPIHandler/codAPIHandler', () => {
   return {
     codAPIHandler: {
-      getLastMatchId: jest.fn(),
+      getLastMatchesIdFrom: jest.fn().mockReturnValue([]),
       getMatchInfo: jest.fn(),
     },
   }

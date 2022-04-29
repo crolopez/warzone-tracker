@@ -40,8 +40,7 @@ describe('telegramFormatter', () => {
       '(Thu, 31 Mar 2022 15:26:34 GMT)\n\n' +
 
       '*Mode:* BR Trios\n' +
-      '*Position:* 6\n' +
-      '*Lobby K/D:* ???\n\n' +
+      '*Position:* 6\n\n' +
 
       '*FakeUserName* | *K:* 33 | *K/D:* 5.99\n'+
       '*FakeSecondName* | *K:* 16 | *K/D:* 0.72\n'
@@ -59,8 +58,7 @@ describe('telegramFormatter', () => {
       '(Thu, 31 Mar 2022 15:26:34 GMT)\n\n' +
 
       '*Mode:* unexpected\\_mode\n' +
-      '*Position:* 6\n' +
-      '*Lobby K/D:* ???\n\n' +
+      '*Position:* 6\n\n' +
 
       '*FakeUserName* | *K:* 33 | *K/D:* 5.99\n'+
       '*FakeSecondName* | *K:* 16 | *K/D:* 0.72\n'

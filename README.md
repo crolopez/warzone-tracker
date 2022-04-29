@@ -25,6 +25,7 @@ To configure the application you have to set the following environment variables
 | TELEGRAM_BOT_TOKEN | API token from your Telegram bot |
 | DATABASE_CONNECTION_STRING | Connection string to the MongoDB service |
 | ACCEPT_SSO_FROM | Accept SSO tokens only from the user specified here |
+| MAX_REPORTS_PER_USER | Maximum reports to be sent per user at once. It is recommended not to use more than 4 |
 
 Example:
 
@@ -32,6 +33,7 @@ Example:
 TELEGRAM_BOT_TOKEN=129238594:AAF5Safasfj899834781l8asdaszZ3
 DATABASE_CONNECTION_STRING=https://db8a89sd9keladsa.asd992klas.com/user=9384839
 ACCEPT_SSO_FROM=manoleitor#53781
+MAX_REPORTS_PER_USER=4
 ```
 
 ## Telegram commands

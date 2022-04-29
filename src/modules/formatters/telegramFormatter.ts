@@ -21,8 +21,7 @@ class TelegramFormatter {
     return `*//////////// Match ////////////*\n\
 (${new Date(mainPlayerInfo.utcStartSeconds * 1000).toUTCString()})\n\n\
 *Mode:* ${getGameMode(mainPlayerInfo.mode)}\n\
-*Position:* ${mainPlayerInfo.playerStats.teamPlacement}\n\
-*Lobby K/D:* ???\n\n\
+*Position:* ${mainPlayerInfo.playerStats.teamPlacement}\n\n\
 ${playersReport}`
   }
 }

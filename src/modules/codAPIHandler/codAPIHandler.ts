@@ -16,7 +16,7 @@ class CoDAPIHandler {
     return userEntries.length > 0
   }
 
-  async getLastMatchId(ssoToken: string, user: string): Promise<string> {
+  async getLastMatchesIdFrom(ssoToken: string, user: string, fromMatchId?: string): Promise<string[]> {
     const response = await sendUserRequest(ssoToken, user, MatchesRequest)
     assertValidResponse(response)
 
@@ -24,10 +24,15 @@ class CoDAPIHandler {
       throw new Error(response.data.message)
     }
 
-    const lastMatch = response.data.matches
-      .sort((x, y) => y.utcStartSeconds - x.utcStartSeconds)[0]
+    let matches = response.data.matches
+    const fromMatch = matches.filter(x => x.matchID == fromMatchId)[0]
+    if (fromMatch !== undefined) {
+      matches = matches.filter(x => x.utcStartSeconds > fromMatch.utcStartSeconds)
+    }
 
-    return lastMatch.matchID
+    return matches
+      .sort((x, y) => y.utcStartSeconds - x.utcStartSeconds)
+      .map(x => x.matchID)
   }
 
   async getMatchInfo(sso: string, user: string, matchId: string): Promise<PlayerMatch[]> {

@@ -6,7 +6,6 @@ import { sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIH
 jest.mock('../../../../../src/modules/codAPIHandler/utils')
 const sendRequestMock = sendRequest as jest.MockedFunction<typeof sendRequest>
 const sendUserRequestMock = sendUserRequest as jest.MockedFunction<typeof sendUserRequest>
-//const getLastMatchMock = getLastMatch as jest.MockedFunction<typeof getLastMatch>
 
 describe('codAPIHandler', () => {
   const testUser = 'FakeUser#9812'
@@ -88,7 +87,7 @@ describe('codAPIHandler', () => {
     })
   })
 
-  test('#getLastMatchId (returns last match)', async () => {
+  test('#getLastMatchesIdFrom (returns last match)', async () => {
     sendUserRequestMock.mockResolvedValueOnce({
       status: 'success',
       data: {
@@ -105,16 +104,20 @@ describe('codAPIHandler', () => {
             utcStartSeconds: 10,
             matchID: '678',
           },
+          {
+            utcStartSeconds: 40,
+            matchID: '910',
+          },
         ] as unknown as PlayerMatch[],
       },
     } as unknown as APIResponse)
 
-    const response = await codAPIHandler.getLastMatchId(testSSO, testUser)
+    const response = await codAPIHandler.getLastMatchesIdFrom(testSSO, testUser, '123')
 
-    expect(response).toBe('456')
+    expect(response).toStrictEqual([ '910', '456'] )
   })
 
-  test('#getLastMatchId (no matches found)', async () => {
+  test('#getLastMatchesIdFrom (no matches found)', async () => {
     sendUserRequestMock.mockResolvedValueOnce({
       status: 'success',
       data: {
@@ -124,7 +127,7 @@ describe('codAPIHandler', () => {
     } as unknown as APIResponse)
 
     try {
-      await codAPIHandler.getLastMatchId(testSSO, testUser)
+      await codAPIHandler.getLastMatchesIdFrom(testSSO, testUser)
 
       expect(1).toBe(0)
     } catch(error: any) {

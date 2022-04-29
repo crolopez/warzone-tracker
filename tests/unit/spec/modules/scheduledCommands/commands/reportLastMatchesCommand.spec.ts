@@ -82,7 +82,7 @@ describe('reportLastMatchesCommand', () => {
       user: 'FakeUser',
       lastMatch: 'FakeMatchId',
     }])
-    codAPIHandler.getLastMatchId = jest.fn().mockResolvedValueOnce('FakeMatchId')
+    codAPIHandler.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['FakeMatchId'])
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
 
@@ -91,12 +91,13 @@ describe('reportLastMatchesCommand', () => {
     expect(codAPIHandler.getMatchInfo).toBeCalledTimes(0)
   })
 
-  test('#handler (match not reported)', async () => {
+  test('#handler (match not reported yet)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
     dbHandler.getReports = jest.fn().mockResolvedValueOnce([fakeStoredReport])
-    codAPIHandler.getLastMatchId = jest.fn().mockResolvedValueOnce('OldMatchId')
+    codAPIHandler.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['OldMatchId'])
     codAPIHandler.getMatchInfo = jest.fn().mockResolvedValueOnce([{
       utcStartSeconds: 0,
+      matchID: 'OldMatchId',
     }])
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
@@ -113,9 +114,10 @@ describe('reportLastMatchesCommand', () => {
       fakeStoredReport,
       fakeStoredReport,
     ])
-    codAPIHandler.getLastMatchId = jest.fn().mockResolvedValue('OldMatchId')
+    codAPIHandler.getLastMatchesIdFrom = jest.fn().mockResolvedValue(['OldMatchId'])
     codAPIHandler.getMatchInfo = jest.fn().mockResolvedValue([{
       utcStartSeconds: 0,
+      matchID: 'OldMatchId',
     }])
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
@@ -131,9 +133,10 @@ describe('reportLastMatchesCommand', () => {
       ... fakeStoredReport,
       channels: [ 1, 2, 3, 4, 5 ],
     }])
-    codAPIHandler.getLastMatchId = jest.fn().mockResolvedValueOnce('OldMatchId')
+    codAPIHandler.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['OldMatchId'])
     codAPIHandler.getMatchInfo = jest.fn().mockResolvedValueOnce([{
       utcStartSeconds: 0,
+      matchID: 'OldMatchId',
     }])
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
@@ -141,5 +144,43 @@ describe('reportLastMatchesCommand', () => {
     expect(codAPIHandler.getMatchInfo).toBeCalledTimes(1)
     expect(dbHandler.updateReports).toBeCalledTimes(1)
     expect(telegramSender.send).toBeCalledTimes(5)
+  })
+
+  test('#handler (no matches found for the user)', async () => {
+    dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
+    dbHandler.getReports = jest.fn().mockResolvedValueOnce([{
+      ... fakeStoredReport,
+      channels: [ 1, 2, 3, 4, 5 ],
+    }])
+    codAPIHandler.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce([])
+    codAPIHandler.getMatchInfo = jest.fn().mockResolvedValueOnce([{
+      utcStartSeconds: 0,
+      matchID: 'OldMatchId',
+    }])
+
+    await reportLastMatchesCommand.handler(commandRequest, testArgs)
+
+    expect(codAPIHandler.getMatchInfo).toBeCalledTimes(0)
+    expect(dbHandler.updateReports).toBeCalledTimes(0)
+    expect(telegramSender.send).toBeCalledTimes(0)
+  })
+
+  test('#handler (could not get matches info)', async () => {
+    dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
+    dbHandler.getReports = jest.fn().mockResolvedValueOnce([{
+      ... fakeStoredReport,
+      channels: [ 1, 2, 3, 4, 5 ],
+    }])
+    codAPIHandler.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['OldMatchId'])
+    codAPIHandler.getMatchInfo = jest.fn().mockRejectedValueOnce([{
+      utcStartSeconds: 0,
+      matchID: 'OldMatchId',
+    }])
+
+    await reportLastMatchesCommand.handler(commandRequest, testArgs)
+
+    expect(codAPIHandler.getMatchInfo).toBeCalledTimes(1)
+    expect(dbHandler.updateReports).toBeCalledTimes(0)
+    expect(telegramSender.send).toBeCalledTimes(0)
   })
 })

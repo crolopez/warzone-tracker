@@ -12,10 +12,16 @@ async function sendReportsViaTelegram(matchInfo: PlayerMatch[], user: string, ch
   const formattedMatchReport = telegramFormatter.matchReportFormatter(matchInfo, user)
   const matchId = matchInfo[0].matchID
 
-  channels.forEach(async channel => {
-    console.log(`Sending Telegram report for ${user} for ${matchId} match`)
+  const messagesSent = Array.from(channels, async channel => {
+    console.log(`Sending Telegram report for ${user} for ${matchId} match in ${channel} channel`)
     await telegramSender.send(channel, formattedMatchReport)
   })
+
+  await Promise.allSettled(messagesSent)
+}
+
+function getPromiseValue(promise: PromiseSettledResult<PlayerMatch[]>): PlayerMatch[] | undefined {
+  return promise.status === 'fulfilled' ? promise.value : undefined
 }
 
 const reportLastMatches = async (commandRequest: CommandRequest, args: string[]): Promise<CommandResponse> => {
@@ -29,25 +35,41 @@ const reportLastMatches = async (commandRequest: CommandRequest, args: string[])
 
   const ssoToken = sso.ssoToken as unknown as string
   const reports = await dbHandler.getReports()
-  const promises = Array.from(reports, async report => {
+  const reportsSentForAllUser = Array.from(reports, async report => {
     const user = report.user.valueOf() as string
+    const channels = report.channels.valueOf() as number[]
     const lastReportedMatchId = report.lastMatch.valueOf() as string
-    const lastMatchId = await codAPIHandler.getLastMatchId(ssoToken, user)
+    const lastMatches = await codAPIHandler.getLastMatchesIdFrom(ssoToken, user, lastReportedMatchId)
 
-    if (lastReportedMatchId == lastMatchId) {
-      console.log(`Match ${lastMatchId} already reported for ${user}`)
+    if (lastMatches.length == 0) {
+      console.log(`Match ${lastReportedMatchId} already reported for ${user}`)
       return
     }
 
-    const matchInfo = await codAPIHandler.getMatchInfo(ssoToken, user, lastMatchId)
-    const lastMatchTimestamp = matchInfo[0].utcStartSeconds
-    await dbHandler.updateReports(report, lastMatchId, lastMatchTimestamp)
+    const playerMatchesInfo = Array.from(lastMatches.slice(0, 5), async matchId => {
+      return await codAPIHandler.getMatchInfo(ssoToken, user, matchId)
+    })
 
-    const channels = report.channels.valueOf() as number[]
-    await sendReportsViaTelegram(matchInfo, user, channels)
+    await Promise.allSettled(playerMatchesInfo)
+      .then(async promisedMatches => {
+        for (const promisedMatch of promisedMatches.reverse()) {
+          const matchValue = getPromiseValue(promisedMatch)
+          if (matchValue === undefined) {
+            return
+          }
+
+          await sendReportsViaTelegram(matchValue, user, channels)
+
+          const matchId = matchValue[0].matchID
+          if (matchId == lastMatches[0]) {
+            const lastMatchTimestamp = matchValue[0].utcStartSeconds
+            await dbHandler.updateReports(report, matchId, lastMatchTimestamp)
+          }
+        }
+      })
   })
 
-  await Promise.allSettled(promises)
+  await Promise.allSettled(reportsSentForAllUser)
 
   return {
     response: ScheduledReportDone,

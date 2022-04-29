@@ -20,8 +20,8 @@ const lastMatch = async (commandRequest: CommandRequest, args: string[]): Promis
   }
 
   const ssoToken = sso.ssoToken as unknown as string
-  const lastMatchId = await codAPIHandler.getLastMatchId(ssoToken, user)
-  const matchInfo = await codAPIHandler.getMatchInfo(ssoToken, user, lastMatchId)
+  const lastMatchId = await codAPIHandler.getLastMatchesIdFrom(ssoToken, user)
+  const matchInfo = await codAPIHandler.getMatchInfo(ssoToken, user, lastMatchId[0])
   const formattedMatchReport = telegramFormatter.matchReportFormatter(matchInfo, user)
 
   const request = commandRequest as TelegramCommandRequest
