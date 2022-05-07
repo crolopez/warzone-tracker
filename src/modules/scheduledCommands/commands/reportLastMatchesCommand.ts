@@ -21,7 +21,7 @@ async function sendReportsViaTelegram(matchInfo: PlayerMatch[], user: string, ch
   await Promise.allSettled(messagesSent)
 }
 
-function getPromiseValue(promise: PromiseSettledResult<PlayerMatch[]>): PlayerMatch[] | undefined {
+function getPromiseValue(promise: PromiseSettledResult<PlayerMatch[] | undefined>): PlayerMatch[] | undefined {
   return promise.status === 'fulfilled' ? promise.value : undefined
 }
 
@@ -41,12 +41,16 @@ const reportLastMatches = async (commandRequest: CommandRequest, args: string[])
   const reportsSentForAllUser = Array.from(reports, async report => {
     const user = report.user.valueOf() as string
     const channels = report.channels.valueOf() as number[]
-    const lastReportedId = report.lastMatch.valueOf() as string
     const lastReportedTimestamp = report.lastMatchTimestamp.valueOf() as number
 
     const lastMatches = await codAPIHandler.getLastMatchesIdFrom(user, lastReportedTimestamp)
-    if (lastMatches.length == 0) {
-      console.log(`Match ${lastReportedId} already reported for ${user}`)
+    if (lastMatches == undefined) {
+      console.error(`Could not get the last matches from ${user}`)
+      return
+    }
+
+    if (lastMatches.length === 0) {
+      console.log(`There are no pending matches to report for ${user}`)
       return
     }
 

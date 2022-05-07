@@ -62,13 +62,6 @@ function getRequestForPlatform(user: string, ssoToken: string, route: string, pl
   return sendRequest(ssoToken, requestProperties)
 }
 
-function assertValidResponse(response: APIResponse): void {
-  if (response.status !== 'success') {
-    console.log(`Unexpected response: ${response.data.message}`)
-    throw new Error(response.data.message)
-  }
-}
-
 async function sendUserRequest(ssoToken:string, user: string, route: string): Promise<APIResponse> {
   const platform = await getStoredPlatform(user)
 
@@ -113,4 +106,4 @@ async function sendRequest(ssoToken:string, requestProperties: RequestProperties
   return { ... data, requestProperties: requestProperties }
 }
 
-export { sendRequest, sendUserRequest, assertValidResponse }
+export { sendRequest, sendUserRequest }

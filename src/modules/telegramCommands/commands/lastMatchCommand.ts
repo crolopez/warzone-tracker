@@ -1,11 +1,12 @@
 import { CodAPIHandler } from '../../codAPIHandler/CodAPIHandler'
+import { PlayerMatch } from '../../codAPIHandler/types/PlayerMatch'
 import { Command } from '../../commandDispatcher/types/Command'
 import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
 import { dbHandler } from '../../dbHandler/dbHandler'
 import { telegramFormatter } from '../../formatters/telegramFormatter'
 import { telegramSender } from '../../telegramSender/telegramSender'
-import { MissingSSOToken } from '../messages'
+import { InvalidUser, MissingSSOToken } from '../messages'
 import { TelegramCommandRequest } from '../types/TelegramCommandRequest'
 
 const lastMatch = async (commandRequest: CommandRequest, args: string[]): Promise<CommandResponse> => {
@@ -21,6 +22,13 @@ const lastMatch = async (commandRequest: CommandRequest, args: string[]): Promis
 
   const codAPIHandler = new CodAPIHandler(sso.ssoToken as unknown as string)
   const lastMatchId = await codAPIHandler.getLastMatchesIdFrom(user)
+  if (lastMatchId == undefined) {
+    return {
+      response: InvalidUser,
+      success: false,
+    }
+  }
+
   const matchInfo = await codAPIHandler.getMatchInfo(user, lastMatchId[0])
   const formattedMatchReport = telegramFormatter.matchReportFormatter(matchInfo, user)
 

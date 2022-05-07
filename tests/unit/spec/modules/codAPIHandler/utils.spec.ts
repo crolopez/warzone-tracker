@@ -2,7 +2,7 @@ import axios from 'axios'
 import { IdTypeVar, MatchIdVar, PlatformVar, UserTagVar } from '../../../../../src/modules/codAPIHandler/apiPaths'
 import { APIResponse } from '../../../../../src/modules/codAPIHandler/types/APIResponse'
 import { Platform } from '../../../../../src/modules/codAPIHandler/types/Platform'
-import { assertValidResponse, sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
+import { sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'
 
 jest.mock('axios')
@@ -34,30 +34,6 @@ describe('utils', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-  })
-
-  test('#assertValidResponse', async () => {
-    assertValidResponse({
-      status: 'success',
-    } as unknown as APIResponse)
-  })
-
-  test('#assertValidResponse (error status)', async () => {
-    try {
-      assertValidResponse({
-        status: 'error',
-        requestProperties: {
-          route: 'FakeRoute',
-        },
-        data: {
-          message: 'Fake error',
-        },
-      })
-
-      expect(1).toBe(0)
-    } catch (error: any) {
-      expect(error.message).toBe('Fake error')
-    }
   })
 
   test('#sendUserRequest (request is sent for all platforms)', async () => {

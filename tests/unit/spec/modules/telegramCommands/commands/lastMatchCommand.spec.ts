@@ -4,7 +4,7 @@ import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAP
 import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { telegramFormatter } from '../../../../../../src/modules/formatters/telegramFormatter'
 import { lastMatchCommand } from '../../../../../../src/modules/telegramCommands/commands/lastMatchCommand'
-import { MissingSSOToken } from '../../../../../../src/modules/telegramCommands/messages'
+import { InvalidUser, MissingSSOToken } from '../../../../../../src/modules/telegramCommands/messages'
 import { telegramSender } from '../../../../../../src/modules/telegramSender/telegramSender'
 
 jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
@@ -93,6 +93,23 @@ describe('lastMatchCommand', () => {
       [ '', '', '' ])
 
     expect(mockSend).toBeCalledWith(testChatId, 'FormattedText')
+  })
+
+  test('#lastMatch (invalid user)', async () => {
+    dbHandler.getCredentials = jest.fn().mockResolvedValueOnce({
+      ssoToken: 'FakeToken',
+    })
+    telegramSender.send = jest.fn().mockReturnValueOnce('Test response')
+    CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockReturnValue(undefined)
+
+    const response = await lastMatchCommand.handler(
+      telegramCommandRequest,
+      [ '', '', '' ])
+
+    expect(response).toStrictEqual({
+      response: InvalidUser,
+      success: false,
+    })
   })
 
   test('#lastMatch', async () => {

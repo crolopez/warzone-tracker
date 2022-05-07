@@ -81,13 +81,20 @@ describe('reportLastMatchesCommand', () => {
     })
   })
 
+  test('#handler (cannot get last matches)', async () => {
+    dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
+    dbHandler.getReports = jest.fn().mockResolvedValueOnce([fakeStoredReport])
+    CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(undefined)
+
+    await reportLastMatchesCommand.handler(commandRequest, testArgs)
+
+    expect(CodAPIHandler.prototype.getMatchInfo).toBeCalledTimes(0)
+  })
+
   test('#handler (match already reported)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([{
-      user: 'FakeUser',
-      lastMatch: 'FakeMatchId',
-    }])
-    CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['FakeMatchId'])
+    dbHandler.getReports = jest.fn().mockResolvedValueOnce([fakeStoredReport])
+    CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce([])
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
 

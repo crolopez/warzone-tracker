@@ -2,7 +2,7 @@ import { IdentitiesRequest, MatchesRequest, MatchPlayersRequest, UserInfoRequest
 import { APIResponse } from './types/APIResponse'
 import { PlayerMatch } from './types/PlayerMatch'
 import { TitleIdentity } from './types/TitleIdentity'
-import { assertValidResponse, sendRequest, sendUserRequest } from './utils'
+import { sendRequest, sendUserRequest } from './utils'
 
 class CodAPIHandler {
   private ssoToken: string
@@ -13,7 +13,6 @@ class CodAPIHandler {
 
   async isValidSSO(allowedUser: string): Promise<boolean> {
     const response = await sendRequest(this.ssoToken, { route: IdentitiesRequest })
-    assertValidResponse(response)
 
     const { titleIdentities } = response.data
     if (titleIdentities == undefined) return false
@@ -22,9 +21,11 @@ class CodAPIHandler {
     return userEntries.length > 0
   }
 
-  async getLastMatchesIdFrom(user: string, from?: number): Promise<string[]> {
+  async getLastMatchesIdFrom(user: string, from?: number): Promise<string[] | undefined> {
     const response = await sendUserRequest(this.ssoToken, user, MatchesRequest)
-    assertValidResponse(response)
+    if (response.status !== 'success') {
+      return undefined
+    }
 
     if (response.data.matches === undefined) {
       throw new Error(response.data.message)
@@ -42,14 +43,15 @@ class CodAPIHandler {
       matchId: matchId,
     })
 
-    assertValidResponse(lastMatchInfo)
+    if (lastMatchInfo.status !== 'success') {
+      throw new Error(lastMatchInfo.data.message)
+    }
 
     return lastMatchInfo.data.allPlayers as PlayerMatch[]
   }
 
   async getUserSummary(user: string): Promise<APIResponse> {
     const response = await sendUserRequest(this.ssoToken, user, UserInfoRequest)
-    assertValidResponse(response)
     return response
   }
 }
