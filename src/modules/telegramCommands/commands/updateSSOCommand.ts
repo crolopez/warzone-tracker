@@ -7,20 +7,20 @@ import { dbHandler } from '../../dbHandler/dbHandler'
 import { telegramHandler } from '../../telegramHandler/telegramHandler'
 import { InvalidSSOTokenUser, UserMustBeAdmin } from '../messages'
 import { TelegramCommandRequest } from '../types/TelegramCommandRequest'
+import { isAdmin } from '../utils'
 
 const updateSSO = async (commandRequest: CommandRequest, args: string[]): Promise<CommandResponse> => {
   const ssoToken = args[2]
   const allowedUser = configReader.getConfig().acceptSSOFrom
   const request = commandRequest as TelegramCommandRequest
 
-  const chatAdmins = await telegramHandler.getChatAdministrators(request.source.chatId)
-  if (chatAdmins.filter(x => x.id == request.from.userId).length == 0) {
+  if (configReader.getConfig().adminCommands
+    && !(await isAdmin(request.from.userId, request.source.chatId))) {
     return {
       response: UserMustBeAdmin,
       success: false,
     }
   }
-
   const codAPIHandler = new CodAPIHandler(ssoToken)
   if (!await codAPIHandler.isValidSSO(allowedUser)) {
     return {

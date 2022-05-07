@@ -4,4 +4,5 @@ export interface Configuration {
   databaseConnectionString: string
   acceptSSOFrom: string
   maxReportsPerUser: number
+  adminCommands: boolean
 }

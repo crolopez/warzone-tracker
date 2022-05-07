@@ -26,6 +26,7 @@ To configure the application you have to set the following environment variables
 | DATABASE_CONNECTION_STRING | Connection string to the MongoDB service |
 | ACCEPT_SSO_FROM | Accept SSO tokens only from the user specified here |
 | MAX_REPORTS_PER_USER | Maximum reports to be sent per user at once. It is recommended not to use more than 4 |
+| ADMIN_COMMANDS | If some commands need admin privileges. Accepted values: `true` or `false` |
 
 Example:
 
@@ -34,18 +35,19 @@ TELEGRAM_BOT_TOKEN=129238594:AAF5Safasfj899834781l8asdaszZ3
 DATABASE_CONNECTION_STRING=https://db8a89sd9keladsa.asd992klas.com/user=9384839
 ACCEPT_SSO_FROM=manoleitor#53781
 MAX_REPORTS_PER_USER=4
+ADMIN_COMMANDS=true
 ```
 
 ## Telegram commands
 
 These are the commands you can interact with using the Telegram bot.
 
-| Command | Description |
-|-|-|
-| `/UpdateSSO <SSO>` | Register a SSO to be able to use the bot |
-| `/Version` | Get the bot version |
-| `/LastMatch <User>` | Get user last match |
-| `/RegisterUserReports <User>` | Register user reports for the invoking channel  |
+| Command | Description | Administrator only option |
+|-|-|-|
+| `/UpdateSSO <SSO>` | Register a SSO to be able to use the bot | Yes |
+| `/Version` | Get the bot version | No |
+| `/LastMatch <User>` | Get user last match | No |
+| `/RegisterUserReports <User>` | Register user reports for the invoking channel | Yes |
 
 ## Scheduled reports
 

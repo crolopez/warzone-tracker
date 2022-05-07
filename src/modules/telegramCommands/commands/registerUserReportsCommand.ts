@@ -2,17 +2,19 @@ import { CodAPIHandler } from '../../codAPIHandler/CodAPIHandler'
 import { Command } from '../../commandDispatcher/types/Command'
 import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
+import { configReader } from '../../configReader/configReader'
 import { dbHandler } from '../../dbHandler/dbHandler'
 import { telegramHandler } from '../../telegramHandler/telegramHandler'
 import { InvalidUser, MissingSSOToken, UserMustBeAdmin, UserRegisteredForChannel } from '../messages'
 import { TelegramCommandRequest } from '../types/TelegramCommandRequest'
+import { isAdmin } from '../utils'
 
 const register = async (commandRequest: CommandRequest, args: string[]): Promise<CommandResponse> => {
   const user = args[2]
   const request = commandRequest as TelegramCommandRequest
 
-  const chatAdmins = await telegramHandler.getChatAdministrators(request.source.chatId)
-  if (chatAdmins.filter(x => x.id == request.from.userId).length == 0) {
+  if (configReader.getConfig().adminCommands
+    && !(await isAdmin(request.from.userId, request.source.chatId))) {
     return {
       response: UserMustBeAdmin,
       success: false,
