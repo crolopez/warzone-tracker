@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { IdTypeVar, MatchIdVar, PlatformVar, UserTagVar } from '../../../../../src/modules/codAPIHandler/apiPaths'
-import { APIResponse } from '../../../../../src/modules/codAPIHandler/types/APIResponse'
 import { Platform } from '../../../../../src/modules/codAPIHandler/types/Platform'
 import { sendRequest, sendUserRequest } from '../../../../../src/modules/codAPIHandler/utils'
 import { dbHandler } from '../../../../../src/modules/dbHandler/dbHandler'

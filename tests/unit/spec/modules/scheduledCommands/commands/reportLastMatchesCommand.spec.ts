@@ -2,11 +2,11 @@ import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAP
 import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { reportLastMatchesCommand } from '../../../../../../src/modules/scheduledCommands/commands/reportLastMatchesCommand'
 import { MissingSSOToken, ScheduledReportDone } from '../../../../../../src/modules/scheduledCommands/messages'
-import { telegramSender } from '../../../../../../src/modules/telegramSender/telegramSender'
+import { telegramHandler } from '../../../../../../src/modules/telegramHandler/telegramHandler'
 
-jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
+jest.mock('../../../../../../src/modules/telegramHandler/telegramHandler', () => {
   return {
-    telegramSender: {
+    telegramHandler: {
       send: jest.fn(),
     },
   }
@@ -74,7 +74,7 @@ describe('reportLastMatchesCommand', () => {
 
     const response = await reportLastMatchesCommand.handler(commandRequest, testArgs)
 
-    expect(telegramSender.send).toBeCalledTimes(0)
+    expect(telegramHandler.send).toBeCalledTimes(0)
     expect(response).toStrictEqual({
       response: ScheduledReportDone,
       success: true,
@@ -98,7 +98,7 @@ describe('reportLastMatchesCommand', () => {
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
 
-    expect(telegramSender.send).toBeCalledTimes(0)
+    expect(telegramHandler.send).toBeCalledTimes(0)
     expect(dbHandler.updateReports).toBeCalledTimes(0)
     expect(CodAPIHandler.prototype.getMatchInfo).toBeCalledTimes(0)
   })
@@ -116,7 +116,7 @@ describe('reportLastMatchesCommand', () => {
 
     expect(CodAPIHandler.prototype.getMatchInfo).toBeCalledTimes(1)
     expect(dbHandler.updateReports).toBeCalledTimes(1)
-    expect(telegramSender.send).toBeCalledTimes(1)
+    expect(telegramHandler.send).toBeCalledTimes(1)
   })
 
   test('#handler (process reports for several users)', async () => {
@@ -136,7 +136,7 @@ describe('reportLastMatchesCommand', () => {
 
     expect(CodAPIHandler.prototype.getMatchInfo).toBeCalledTimes(3)
     expect(dbHandler.updateReports).toBeCalledTimes(3)
-    expect(telegramSender.send).toBeCalledTimes(3)
+    expect(telegramHandler.send).toBeCalledTimes(3)
   })
 
   test('#handler (match is reported for several channels)', async () => {
@@ -155,7 +155,7 @@ describe('reportLastMatchesCommand', () => {
 
     expect(CodAPIHandler.prototype.getMatchInfo).toBeCalledTimes(1)
     expect(dbHandler.updateReports).toBeCalledTimes(1)
-    expect(telegramSender.send).toBeCalledTimes(5)
+    expect(telegramHandler.send).toBeCalledTimes(5)
   })
 
   test('#handler (no matches found for the user)', async () => {
@@ -174,7 +174,7 @@ describe('reportLastMatchesCommand', () => {
 
     expect(CodAPIHandler.prototype.getMatchInfo).toBeCalledTimes(0)
     expect(dbHandler.updateReports).toBeCalledTimes(0)
-    expect(telegramSender.send).toBeCalledTimes(0)
+    expect(telegramHandler.send).toBeCalledTimes(0)
   })
 
   test('#handler (could not get matches info)', async () => {
@@ -193,6 +193,6 @@ describe('reportLastMatchesCommand', () => {
 
     expect(CodAPIHandler.prototype.getMatchInfo).toBeCalledTimes(1)
     expect(dbHandler.updateReports).toBeCalledTimes(0)
-    expect(telegramSender.send).toBeCalledTimes(0)
+    expect(telegramHandler.send).toBeCalledTimes(0)
   })
 })

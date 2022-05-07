@@ -1,13 +1,14 @@
 import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAPIHandler'
 import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { registerUserReportsCommand } from '../../../../../../src/modules/telegramCommands/commands/registerUserReportsCommand'
-import { InvalidUser, MissingSSOToken, UserRegisteredForChannel } from '../../../../../../src/modules/telegramCommands/messages'
+import { InvalidUser, MissingSSOToken, UserMustBeAdmin, UserRegisteredForChannel } from '../../../../../../src/modules/telegramCommands/messages'
+import { telegramHandler } from '../../../../../../src/modules/telegramHandler/telegramHandler'
 
 jest.mock('../../../../../../src/modules/dbHandler/dbHandler')
 
-jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
+jest.mock('../../../../../../src/modules/telegramHandler/telegramHandler', () => {
   return {
-    telegramSender: {
+    telegramHandler: {
       send: jest.fn().mockResolvedValue('Send response'),
     },
   }
@@ -25,10 +26,19 @@ describe('registerUserReportsCommand', () => {
     source: {
       chatId: 98765,
     },
+    from: {
+      userId: 8912,
+    },
+  }
+  const adminNode = {
+    id: telegramCommandRequest.from.userId,
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
+    telegramHandler.getChatAdministrators = jest.fn().mockResolvedValueOnce([
+      adminNode,
+    ])
   })
 
   test('#validate (returns ok)', async () => {
@@ -56,6 +66,19 @@ describe('registerUserReportsCommand', () => {
 
     expect(response).toStrictEqual({
       response: UserRegisteredForChannel,
+      success: false,
+    })
+  })
+
+  test('#handler (user not admin)', async () => {
+    dbHandler.isUserRegistered = jest.fn().mockResolvedValueOnce(true)
+    const nonAdminRequest = { ... telegramCommandRequest, from: { userId: 999999 }}
+
+    const response = await registerUserReportsCommand.handler(
+      nonAdminRequest, [ '', '', 'FakeUser' ])
+
+    expect(response).toStrictEqual({
+      response: UserMustBeAdmin,
       success: false,
     })
   })

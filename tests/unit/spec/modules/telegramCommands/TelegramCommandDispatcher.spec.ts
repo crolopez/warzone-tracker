@@ -5,11 +5,11 @@ import { registerUserReportsCommand } from '../../../../../src/modules/telegramC
 import { updateSSOCommand } from '../../../../../src/modules/telegramCommands/commands/updateSSOCommand'
 import { versionCommand } from '../../../../../src/modules/telegramCommands/commands/versionCommand'
 import { TelegramCommandDispatcher } from '../../../../../src/modules/telegramCommands/TelegramCommandDispatcher'
-import { telegramSender } from '../../../../../src/modules/telegramSender/telegramSender'
+import { telegramHandler } from '../../../../../src/modules/telegramHandler/telegramHandler'
 
 jest.mock('../../../../../src/modules/commandDispatcher/CommandDispatcher')
 
-jest.mock('../../../../../src/modules/telegramSender/telegramSender')
+jest.mock('../../../../../src/modules/telegramHandler/telegramHandler')
 
 jest.mock('../../../../../src/modules/telegramCommands/commands/updateSSOCommand', () => {
   return {
@@ -65,7 +65,7 @@ describe('TelegramCommandDispatcher', () => {
       },
     } as unknown as CommandRequest)
 
-    expect(telegramSender.send).toHaveBeenCalledTimes(1)
+    expect(telegramHandler.send).toHaveBeenCalledTimes(1)
     expect(response).toStrictEqual({
       success: false,
       message: 'TestMessage',
@@ -84,7 +84,7 @@ describe('TelegramCommandDispatcher', () => {
       },
     } as unknown as CommandRequest)
 
-    expect(telegramSender.send).toHaveBeenCalledTimes(0)
+    expect(telegramHandler.send).toHaveBeenCalledTimes(0)
     expect(response).toStrictEqual({
       success: true,
       message: 'TestMessage',

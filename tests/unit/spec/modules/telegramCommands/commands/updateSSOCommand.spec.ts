@@ -1,11 +1,12 @@
 import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAPIHandler'
+import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { updateSSOCommand } from '../../../../../../src/modules/telegramCommands/commands/updateSSOCommand'
-import { InvalidSSOTokenUser } from '../../../../../../src/modules/telegramCommands/messages'
-import { telegramSender } from '../../../../../../src/modules/telegramSender/telegramSender'
+import { InvalidSSOTokenUser, UserMustBeAdmin } from '../../../../../../src/modules/telegramCommands/messages'
+import { telegramHandler } from '../../../../../../src/modules/telegramHandler/telegramHandler'
 
-jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
+jest.mock('../../../../../../src/modules/telegramHandler/telegramHandler', () => {
   return {
-    telegramSender: {
+    telegramHandler: {
       send: jest.fn().mockResolvedValue('Send response'),
     },
   }
@@ -38,11 +39,20 @@ describe('updateSSOCommand', () => {
       type: 'private',
       username: 'UserName',
     },
+    from: {
+      userId: 8917,
+    },
+  }
+  const adminNode = {
+    id: telegramCommandRequest.from.userId,
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
     CodAPIHandler.prototype.isValidSSO = jest.fn().mockResolvedValue(true)
+    telegramHandler.getChatAdministrators = jest.fn().mockResolvedValueOnce([
+      adminNode,
+    ])
   })
 
   test('#validate (returns ok)', async () => {
@@ -74,10 +84,22 @@ describe('updateSSOCommand', () => {
     })
   })
 
-  test('#handler (calls TelegramSender)', async () => {
+  test('#handler (user not admin)', async () => {
+    dbHandler.isUserRegistered = jest.fn().mockResolvedValueOnce(true)
+    const nonAdminRequest = { ... telegramCommandRequest, from: { userId: 999999 }}
+
+    const response = await updateSSOCommand.handler(nonAdminRequest, [])
+
+    expect(response).toStrictEqual({
+      response: UserMustBeAdmin,
+      success: false,
+    })
+  })
+
+  test('#handler (calls telegramHandler)', async () => {
     await updateSSOCommand.handler(telegramCommandRequest, [])
 
-    expect(telegramSender.send).toBeCalledWith(98765, 'SSO updated')
+    expect(telegramHandler.send).toBeCalledWith(98765, 'SSO updated')
   })
 
   test('#handler (invalid SSO)', async () => {

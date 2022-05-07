@@ -24,8 +24,6 @@ then
   ENDPOINT="${ENDPOINT}${ROUTE}"
 fi
 
-echo "Endpoint: ${ENDPOINT}"
-
 curl --request POST \
   --url "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
   --header "content-type: application/json" \
