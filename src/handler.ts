@@ -7,7 +7,7 @@ import { ScheduledCommandDispatcher } from './modules/scheduledCommands/Schedule
 async function processTelegramEvent(event: any): Promise<any> {
   const parsedEvent = telegramEventParser.parse(event)
   const commandRequest = mapper.telegramEventToTelegramCommandRequest(parsedEvent)
-  return commandRequest !== undefined
+  return commandRequest !== undefined && commandRequest.command !== undefined
     ? await new TelegramCommandDispatcher().dispatch(commandRequest)
     : 'Unprocessed message'
 }

@@ -1,13 +1,16 @@
 import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAPIHandler'
+import { configReader } from '../../../../../../src/modules/configReader/configReader'
 import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { registerUserReportsCommand } from '../../../../../../src/modules/telegramCommands/commands/registerUserReportsCommand'
-import { InvalidUser, MissingSSOToken, UserRegisteredForChannel } from '../../../../../../src/modules/telegramCommands/messages'
+import { InvalidUser, MissingSSOToken, UserMustBeAdmin, UserRegisteredForChannel } from '../../../../../../src/modules/telegramCommands/messages'
+import { isAdmin } from '../../../../../../src/modules/telegramCommands/utils'
+import { telegramHandler } from '../../../../../../src/modules/telegramHandler/telegramHandler'
 
 jest.mock('../../../../../../src/modules/dbHandler/dbHandler')
 
-jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
+jest.mock('../../../../../../src/modules/telegramHandler/telegramHandler', () => {
   return {
-    telegramSender: {
+    telegramHandler: {
       send: jest.fn().mockResolvedValue('Send response'),
     },
   }
@@ -19,16 +22,32 @@ jest.mock('../../../../../../package.json', () => {
   }
 })
 
+jest.mock('../../../../../../src/modules/telegramCommands/utils')
+
+const isAdminMock = isAdmin as jest.MockedFunction<typeof isAdmin>
+
 describe('registerUserReportsCommand', () => {
   const telegramCommandRequest = {
     command: '/FakeCommand',
     source: {
       chatId: 98765,
     },
+    from: {
+      userId: 8912,
+    },
+  }
+  const adminNode = {
+    id: telegramCommandRequest.from.userId,
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
+    telegramHandler.getChatAdministrators = jest.fn().mockResolvedValueOnce([
+      adminNode,
+    ])
+    configReader.getConfig = jest.fn().mockReturnValueOnce({
+      adminCommands: false,
+    })
   })
 
   test('#validate (returns ok)', async () => {
@@ -56,6 +75,23 @@ describe('registerUserReportsCommand', () => {
 
     expect(response).toStrictEqual({
       response: UserRegisteredForChannel,
+      success: false,
+    })
+  })
+
+  test('#handler (user not admin)', async () => {
+    dbHandler.isUserRegistered = jest.fn().mockResolvedValueOnce(true)
+    const nonAdminRequest = { ... telegramCommandRequest, from: { userId: 999999 }}
+    configReader.getConfig = jest.fn().mockReturnValueOnce({
+      adminCommands: true,
+    })
+    isAdminMock.mockResolvedValueOnce(false)
+
+    const response = await registerUserReportsCommand.handler(
+      nonAdminRequest, [ '', '', 'FakeUser' ])
+
+    expect(response).toStrictEqual({
+      response: UserMustBeAdmin,
       success: false,
     })
   })

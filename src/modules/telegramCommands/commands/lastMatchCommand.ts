@@ -1,11 +1,10 @@
 import { CodAPIHandler } from '../../codAPIHandler/CodAPIHandler'
-import { PlayerMatch } from '../../codAPIHandler/types/PlayerMatch'
 import { Command } from '../../commandDispatcher/types/Command'
 import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
 import { dbHandler } from '../../dbHandler/dbHandler'
 import { telegramFormatter } from '../../formatters/telegramFormatter'
-import { telegramSender } from '../../telegramSender/telegramSender'
+import { telegramHandler } from '../../telegramHandler/telegramHandler'
 import { InvalidUser, MissingSSOToken } from '../messages'
 import { TelegramCommandRequest } from '../types/TelegramCommandRequest'
 
@@ -33,7 +32,7 @@ const lastMatch = async (commandRequest: CommandRequest, args: string[]): Promis
   const formattedMatchReport = telegramFormatter.matchReportFormatter(matchInfo, user)
 
   const request = commandRequest as TelegramCommandRequest
-  const response = await telegramSender.send(request.source.chatId, formattedMatchReport)
+  const response = await telegramHandler.send(request.source.chatId, formattedMatchReport)
 
   return {
     response: response,

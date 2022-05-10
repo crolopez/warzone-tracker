@@ -6,7 +6,7 @@ import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
 import { configReader } from '../../configReader/configReader'
 import { dbHandler } from '../../dbHandler/dbHandler'
 import { telegramFormatter } from '../../formatters/telegramFormatter'
-import { telegramSender } from '../../telegramSender/telegramSender'
+import { telegramHandler } from '../../telegramHandler/telegramHandler'
 import { MissingSSOToken, ScheduledReportDone } from '../messages'
 
 async function sendReportsViaTelegram(matchInfo: PlayerMatch[], user: string, channels: number[]): Promise<void> {
@@ -15,7 +15,7 @@ async function sendReportsViaTelegram(matchInfo: PlayerMatch[], user: string, ch
 
   const messagesSent = Array.from(channels, async channel => {
     console.log(`Sending Telegram report for ${user} for ${matchId} match in ${channel} channel`)
-    await telegramSender.send(channel, formattedMatchReport)
+    await telegramHandler.send(channel, formattedMatchReport)
   })
 
   await Promise.allSettled(messagesSent)

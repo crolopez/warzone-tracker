@@ -5,11 +5,11 @@ import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { telegramFormatter } from '../../../../../../src/modules/formatters/telegramFormatter'
 import { lastMatchCommand } from '../../../../../../src/modules/telegramCommands/commands/lastMatchCommand'
 import { InvalidUser, MissingSSOToken } from '../../../../../../src/modules/telegramCommands/messages'
-import { telegramSender } from '../../../../../../src/modules/telegramSender/telegramSender'
+import { telegramHandler } from '../../../../../../src/modules/telegramHandler/telegramHandler'
 
-jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
+jest.mock('../../../../../../src/modules/telegramHandler/telegramHandler', () => {
   return {
-    telegramSender: {
+    telegramHandler: {
       send: mockSend,
     },
   }
@@ -99,7 +99,7 @@ describe('lastMatchCommand', () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce({
       ssoToken: 'FakeToken',
     })
-    telegramSender.send = jest.fn().mockReturnValueOnce('Test response')
+    telegramHandler.send = jest.fn().mockReturnValueOnce('Test response')
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockReturnValue(undefined)
 
     const response = await lastMatchCommand.handler(
@@ -116,7 +116,7 @@ describe('lastMatchCommand', () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce({
       ssoToken: 'FakeToken',
     })
-    telegramSender.send = jest.fn().mockReturnValueOnce('Test response')
+    telegramHandler.send = jest.fn().mockReturnValueOnce('Test response')
 
     const response = await lastMatchCommand.handler(
       telegramCommandRequest,

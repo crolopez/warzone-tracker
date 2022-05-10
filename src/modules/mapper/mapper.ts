@@ -7,9 +7,12 @@ class Mapper {
       ? {
         source: {
           chatId: event.message.chat.id,
-          firstName: event.message.chat.first_name,
-          username: event.message.chat.username,
           type: event.message.chat.type,
+        },
+        from: {
+          userId: event.message.from.id,
+          username: event.message.from.username,
+          firstName: event.message.from.first_name,
         },
         command: event.message.text,
       }

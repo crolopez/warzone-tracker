@@ -1,7 +1,7 @@
 import { CommandDispatcher } from '../commandDispatcher/CommandDispatcher'
 import { CommandRequest } from '../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../commandDispatcher/types/CommandResponse'
-import { telegramSender } from '../telegramSender/telegramSender'
+import { telegramHandler } from '../telegramHandler/telegramHandler'
 import { lastMatchCommand } from './commands/lastMatchCommand'
 import { registerUserReportsCommand } from './commands/registerUserReportsCommand'
 import { updateSSOCommand } from './commands/updateSSOCommand'
@@ -25,7 +25,7 @@ export class TelegramCommandDispatcher extends CommandDispatcher {
 
     if (result.success == false) {
       const request = commandRequest as TelegramCommandRequest
-      await telegramSender.send(request.source.chatId, result.response)
+      await telegramHandler.send(request.source.chatId, result.response)
     }
 
     return result

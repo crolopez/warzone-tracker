@@ -1,9 +1,9 @@
-import { telegramSender } from '../../../../../../src/modules/telegramSender/telegramSender'
+import { telegramHandler } from '../../../../../../src/modules/telegramHandler/telegramHandler'
 import { versionCommand } from '../../../../../../src/modules/telegramCommands/commands/versionCommand'
 
-jest.mock('../../../../../../src/modules/telegramSender/telegramSender', () => {
+jest.mock('../../../../../../src/modules/telegramHandler/telegramHandler', () => {
   return {
-    telegramSender: {
+    telegramHandler: {
       send: jest.fn().mockResolvedValue('Send response'),
     },
   }
@@ -41,9 +41,9 @@ describe('versionCommand', () => {
     })
   })
 
-  test('#handler calls TelegramSender', async () => {
+  test('#handler calls telegramHandler', async () => {
     await versionCommand.handler(telegramCommandRequest, [])
 
-    expect(telegramSender.send).toBeCalledWith(98765, '*Version:* DummyVersion')
+    expect(telegramHandler.send).toBeCalledWith(98765, '*Version:* DummyVersion')
   })
 })

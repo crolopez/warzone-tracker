@@ -5,12 +5,14 @@ describe('configReader', () => {
   const testDatabaseConnectionString = 'TEST:DB-CONNECTION-STRING'
   const testAcceptSSOFrom = 'TEST:ACCEPT-SSO-FROM'
   const testMaxReportsPerUser = '3'
+  const testAdminCommands = 'true'
 
   beforeEach(() => {
     process.env.TELEGRAM_BOT_TOKEN = testBotToken
     process.env.DATABASE_CONNECTION_STRING = testDatabaseConnectionString
     process.env.ACCEPT_SSO_FROM = testAcceptSSOFrom
     process.env.MAX_REPORTS_PER_USER = testMaxReportsPerUser
+    process.env.ADMIN_COMMANDS = testAdminCommands
   })
 
   test('#getConfig', async () => {
@@ -21,6 +23,7 @@ describe('configReader', () => {
       databaseConnectionString: testDatabaseConnectionString,
       acceptSSOFrom: testAcceptSSOFrom,
       maxReportsPerUser: testMaxReportsPerUser,
+      adminCommands: true,
     })
   })
 
@@ -65,6 +68,17 @@ describe('configReader', () => {
       expect(1).toBe(0)
     } catch (error: any) {
       expect(error.message).toBe('MAX_REPORTS_PER_USER is undefined')
+    }
+  })
+
+  test('#getConfig (ADMIN_COMMANDS undefined)', async () => {
+    try {
+      delete process.env.ADMIN_COMMANDS
+      configReader.getConfig()
+
+      expect(1).toBe(0)
+    } catch (error: any) {
+      expect(error.message).toBe('ADMIN_COMMANDS is undefined')
     }
   })
 })

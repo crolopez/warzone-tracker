@@ -6,9 +6,12 @@ describe('mapper', () => {
     message: {
       chat: {
         id: 98765,
+        type: 'private',
+      },
+      from: {
+        id: 99991,
         first_name: 'User',
         username: 'UserName',
-        type: 'private',
       },
       text: '/FakeCommand',
     },
@@ -22,9 +25,12 @@ describe('mapper', () => {
       command: '/FakeCommand',
       source: {
         chatId: 98765,
-        firstName: 'User',
         type: 'private',
+      },
+      from: {
+        userId: 99991,
         username: 'UserName',
+        firstName: 'User',
       },
     })
   })

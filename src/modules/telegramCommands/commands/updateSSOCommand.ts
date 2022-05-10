@@ -4,14 +4,23 @@ import { CommandRequest } from '../../commandDispatcher/types/CommandRequest'
 import { CommandResponse } from '../../commandDispatcher/types/CommandResponse'
 import { configReader } from '../../configReader/configReader'
 import { dbHandler } from '../../dbHandler/dbHandler'
-import { telegramSender } from '../../telegramSender/telegramSender'
-import { InvalidSSOTokenUser } from '../messages'
+import { telegramHandler } from '../../telegramHandler/telegramHandler'
+import { InvalidSSOTokenUser, UserMustBeAdmin } from '../messages'
 import { TelegramCommandRequest } from '../types/TelegramCommandRequest'
+import { isAdmin } from '../utils'
 
 const updateSSO = async (commandRequest: CommandRequest, args: string[]): Promise<CommandResponse> => {
   const ssoToken = args[2]
   const allowedUser = configReader.getConfig().acceptSSOFrom
+  const request = commandRequest as TelegramCommandRequest
 
+  if (configReader.getConfig().adminCommands
+    && !(await isAdmin(request.from.userId, request.source.chatId))) {
+    return {
+      response: UserMustBeAdmin,
+      success: false,
+    }
+  }
   const codAPIHandler = new CodAPIHandler(ssoToken)
   if (!await codAPIHandler.isValidSSO(allowedUser)) {
     return {
@@ -22,8 +31,7 @@ const updateSSO = async (commandRequest: CommandRequest, args: string[]): Promis
 
   await dbHandler.updateCredentials(ssoToken)
 
-  const request = commandRequest as TelegramCommandRequest
-  const response = await telegramSender.send(request.source.chatId, 'SSO updated')
+  const response = await telegramHandler.send(request.source.chatId, 'SSO updated')
 
   return {
     response: response,
