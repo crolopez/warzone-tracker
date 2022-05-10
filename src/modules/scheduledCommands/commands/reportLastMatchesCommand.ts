@@ -7,7 +7,8 @@ import { configReader } from '../../configReader/configReader'
 import { dbHandler } from '../../dbHandler/dbHandler'
 import { telegramFormatter } from '../../formatters/telegramFormatter'
 import { telegramHandler } from '../../telegramHandler/telegramHandler'
-import { MissingSSOToken, ScheduledReportDone } from '../messages'
+import { ScheduledReportDone } from '../messages'
+import { ScheduledCommandRequest } from '../types/ScheduledCommandRequest'
 
 async function sendReportsViaTelegram(matchInfo: PlayerMatch[], user: string, channels: number[]): Promise<void> {
   const formattedMatchReport = telegramFormatter.matchReportFormatter(matchInfo, user)
@@ -26,22 +27,14 @@ function getPromiseValue(promise: PromiseSettledResult<PlayerMatch[] | undefined
 }
 
 const reportLastMatches = async (commandRequest: CommandRequest, args: string[]): Promise<CommandResponse> => {
-  const sso = await dbHandler.getCredentials()
-  if (sso === undefined) {
-    return {
-      response: MissingSSOToken,
-      success: false,
-    }
-  }
-
-  const codAPIHandler = new CodAPIHandler(sso.ssoToken as unknown as string)
-  const reports = await dbHandler.getReports()
+  const scheduledCommandRequest = commandRequest as ScheduledCommandRequest
+  const codAPIHandler = new CodAPIHandler(scheduledCommandRequest.ssoToken)
   const maxReportsPerUser = configReader.getConfig().maxReportsPerUser
 
-  const reportsSentForAllUser = Array.from(reports, async report => {
+  const reportsSentForAllUser = Array.from(scheduledCommandRequest.userReports, async report => {
     const user = report.user.valueOf() as string
     const channels = report.channels.valueOf() as number[]
-    const lastReportedTimestamp = report.lastMatchTimestamp.valueOf() as number
+    const lastReportedTimestamp = report.lastMatchStartTimestamp.valueOf() as number
 
     const lastMatches = await codAPIHandler.getLastMatchesIdFrom(user, lastReportedTimestamp)
     if (lastMatches == undefined) {
@@ -66,12 +59,15 @@ const reportLastMatches = async (commandRequest: CommandRequest, args: string[])
             return
           }
 
-          await sendReportsViaTelegram(matchValue, user, channels)
+          if (scheduledCommandRequest.postMatchReports) {
+            await sendReportsViaTelegram(matchValue, user, channels)
+          }
 
           const matchId = matchValue[0].matchID
           if (matchId == lastMatches[0]) {
-            const lastMatchTimestamp = matchValue[0].utcStartSeconds
-            await dbHandler.updateReports(report, matchId, lastMatchTimestamp)
+            const start = matchValue[0].utcStartSeconds
+            const end = matchValue[0].utcEndSeconds
+            await dbHandler.updateReports(report, matchId, start, end)
           }
         }
       })

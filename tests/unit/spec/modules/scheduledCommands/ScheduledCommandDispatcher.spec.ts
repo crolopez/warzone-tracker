@@ -1,6 +1,7 @@
 import { CommandDispatcher } from '../../../../../src/modules/commandDispatcher/CommandDispatcher'
 import { ScheduledCommandDispatcher } from '../../../../../src/modules/scheduledCommands/ScheduledCommandDispatcher'
 import { reportLastMatchesCommand } from '../../../../../src/modules/scheduledCommands/commands/reportLastMatchesCommand'
+import { reportSessionCommand } from '../../../../../src/modules/scheduledCommands/commands/reportSessionCommand'
 
 jest.mock('../../../../../src/modules/commandDispatcher/CommandDispatcher')
 
@@ -18,6 +19,7 @@ describe('ScheduledCommandDispatcher', () => {
   const scheduledCommandRegex = '^/([^ ]+)'
   const scheduledCommands = [
     reportLastMatchesCommand,
+    reportSessionCommand,
   ]
 
   test('Parent constructor is called using the expected commands', async () => {

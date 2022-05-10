@@ -5,4 +5,5 @@ export interface Configuration {
   acceptSSOFrom: string
   maxReportsPerUser: number
   adminCommands: boolean
+  timeBetweenSessions: number
 }

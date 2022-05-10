@@ -37,7 +37,7 @@ describe('telegramFormatter', () => {
 
     expect(matchFormatted).toBe(
       '*//////////// Match ////////////*\n' +
-      '(Thu, 31 Mar 2022 15:26:34 GMT)\n\n' +
+      'Mar 31st 2022, 15:26:34\n\n' +
 
       '*Mode:* BR Trios\n' +
       '*Position:* 6\n\n' +
@@ -55,7 +55,7 @@ describe('telegramFormatter', () => {
 
     expect(matchFormatted).toBe(
       '*//////////// Match ////////////*\n' +
-      '(Thu, 31 Mar 2022 15:26:34 GMT)\n\n' +
+      'Mar 31st 2022, 15:26:34\n\n' +
 
       '*Mode:* unexpected\\_mode\n' +
       '*Position:* 6\n\n' +

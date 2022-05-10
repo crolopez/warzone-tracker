@@ -13,7 +13,8 @@ const register = async (commandRequest: CommandRequest, args: string[]): Promise
   const user = args[2]
   const request = commandRequest as TelegramCommandRequest
 
-  if (configReader.getConfig().adminCommands
+  if (request.source.type !== 'private'
+    && configReader.getConfig().adminCommands
     && !(await isAdmin(request.from.userId, request.source.chatId))) {
     return {
       response: UserMustBeAdmin,

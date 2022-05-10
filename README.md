@@ -24,9 +24,10 @@ To configure the application you have to set the following environment variables
 |-|-|
 | TELEGRAM_BOT_TOKEN | API token from your Telegram bot |
 | DATABASE_CONNECTION_STRING | Connection string to the MongoDB service |
-| ACCEPT_SSO_FROM | Accept SSO tokens only from the user specified here |
+| ACCEPT_SSO_FROM | Accept SSO tokens only of the user specified here |
 | MAX_REPORTS_PER_USER | Maximum reports to be sent per user at once. It is recommended not to use more than 4 |
 | ADMIN_COMMANDS | If some commands need admin privileges. Accepted values: `true` or `false` |
+| TIME_BETWEEN_SESSIONS | Time in minutes since the last game to report a user's session |
 
 Example:
 
@@ -36,6 +37,7 @@ DATABASE_CONNECTION_STRING=https://db8a89sd9keladsa.asd992klas.com/user=9384839
 ACCEPT_SSO_FROM=manoleitor#53781
 MAX_REPORTS_PER_USER=4
 ADMIN_COMMANDS=true
+TIME_BETWEEN_SESSIONS=90
 ```
 
 ## Telegram commands
@@ -51,16 +53,20 @@ These are the commands you can interact with using the Telegram bot.
 
 ## Scheduled reports
 
-Scheduled reports are events that are launched every X amount of time to perform periodic activities and their activation depends on the serverless platform where this project is deployed.
+Scheduled reports are events that are launched every X amount of time to perform periodic reports and their activation depends on the serverless platform where this project is deployed.
 
-The project is tested on AWS Lambda functions, but could be adapted to other types of serverless platforms by modifying the recipe for deployment without changing production code.
+To do this, we must first register the user whose gaming reports we want to receive using the `/RegisterUserReports <User>` command from one or more groups.
+
+The project is tested on AWS Lambda functions but could be adapted to other types of serverless platforms by modifying the recipe for deployment without changing the production code.
 
 ### Post-match results
 
 It is possible to receive the results of a match as soon as it is over on the desired channels.
 
-To do this, we must first register the user whose post-match results we want to receive using the `/RegisterUserReports <User>` command from one or more groups.
+If we want to enable this functionality, we just have to set the `postMatchReports` field to true on [serverless.yml](./serverless.yml) file.
 
-If we want to disable this functionality we just need to remove the `schedule` block corresponding to the `/ReportLastMatches` command from [serverless.yml](./serverless.yml).
+### Post-session report
 
-To modify the frequency for checking if there is new information of finished matches just modify the `rate` attribute.
+We can receive the gaming session overview when it has ended if we see the `sessionReports` field to true as mentioned in the previous paragraph.
+
+The amount of time that the engine waits until sending the session report is defined by the `TIME_BETWEEN_SESSIONS` environment variable.

@@ -14,6 +14,7 @@ provider:
     DATABASE_CONNECTION_STRING: ${env:DATABASE_CONNECTION_STRING}
     MAX_REPORTS_PER_USER: ${env:MAX_REPORTS_PER_USER}
     ADMIN_COMMANDS: ${env:ADMIN_COMMANDS}
+    TIME_BETWEEN_SESSIONS: ${env:TIME_BETWEEN_SESSIONS}
 
 package:
   individually: true
@@ -41,4 +42,5 @@ functions:
           rate: rate(1 minute)
           enabled: true
           input:
-            scheduleCommand: '/ReportLastMatches'
+            postMatchReports: true
+            sessionReports: true
