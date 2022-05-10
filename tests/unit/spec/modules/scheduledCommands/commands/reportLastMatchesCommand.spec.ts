@@ -1,7 +1,9 @@
+import { UserReportsDoc } from '../../../../../../src/models/types/UserReportsDoc'
 import { CodAPIHandler } from '../../../../../../src/modules/codAPIHandler/CodAPIHandler'
 import { dbHandler } from '../../../../../../src/modules/dbHandler/dbHandler'
 import { reportLastMatchesCommand } from '../../../../../../src/modules/scheduledCommands/commands/reportLastMatchesCommand'
-import { MissingSSOToken, ScheduledReportDone } from '../../../../../../src/modules/scheduledCommands/messages'
+import { ScheduledReportDone } from '../../../../../../src/modules/scheduledCommands/messages'
+import { ScheduledCommandRequest } from '../../../../../../src/modules/scheduledCommands/types/ScheduledCommandRequest'
 import { telegramHandler } from '../../../../../../src/modules/telegramHandler/telegramHandler'
 
 jest.mock('../../../../../../src/modules/telegramHandler/telegramHandler', () => {
@@ -34,18 +36,25 @@ jest.mock('../../../../../../src/modules/dbHandler/dbHandler', () => {
   }
 })
 
+function getCommandRequest(reports: UserReportsDoc[], postMatch: boolean): ScheduledCommandRequest {
+  return {
+    command: '/FakeCommand',
+    ssoToken: 'FakeSSOToken',
+    userReports: reports,
+    postMatchReports: postMatch,
+    sessionReports: false,
+  }
+}
+
 describe('reportLastMatchesCommand', () => {
   const testArgs = [ '', '', '' ]
   const testSSO = { ssoToken: 'FakeSSO' }
-  const commandRequest = {
-    command: '/FakeCommand',
-  }
   const fakeStoredReport = {
     user: 'FakeUser',
     lastMatch: 'FakeMatchId',
     channels: [ 9 ],
-    lastMatchTimestamp: 789,
-  }
+    lastMatchStartTimestamp: 0,
+  } as unknown as UserReportsDoc
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -57,20 +66,9 @@ describe('reportLastMatchesCommand', () => {
     expect(response).toBe('ok')
   })
 
-  test('#handler (missing token)', async () => {
-    dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(undefined)
-
-    const response = await reportLastMatchesCommand.handler(commandRequest, testArgs)
-
-    expect(response).toStrictEqual({
-      response: MissingSSOToken,
-      success: false,
-    })
-  })
-
   test('#handler (no available reports)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([])
+    const commandRequest = getCommandRequest([], true)
 
     const response = await reportLastMatchesCommand.handler(commandRequest, testArgs)
 
@@ -83,7 +81,7 @@ describe('reportLastMatchesCommand', () => {
 
   test('#handler (cannot get last matches)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([fakeStoredReport])
+    const commandRequest = getCommandRequest([fakeStoredReport], true)
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(undefined)
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
@@ -93,7 +91,7 @@ describe('reportLastMatchesCommand', () => {
 
   test('#handler (match already reported)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([fakeStoredReport])
+    const commandRequest = getCommandRequest([fakeStoredReport], true)
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce([])
 
     await reportLastMatchesCommand.handler(commandRequest, testArgs)
@@ -105,7 +103,7 @@ describe('reportLastMatchesCommand', () => {
 
   test('#handler (match not reported yet)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([fakeStoredReport])
+    const commandRequest = getCommandRequest([fakeStoredReport], true)
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['OldMatchId'])
     CodAPIHandler.prototype.getMatchInfo = jest.fn().mockResolvedValueOnce([{
       utcStartSeconds: 0,
@@ -121,11 +119,11 @@ describe('reportLastMatchesCommand', () => {
 
   test('#handler (process reports for several users)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([
+    const commandRequest = getCommandRequest([
       fakeStoredReport,
       fakeStoredReport,
       fakeStoredReport,
-    ])
+    ], true)
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValue(['OldMatchId'])
     CodAPIHandler.prototype.getMatchInfo = jest.fn().mockResolvedValue([{
       utcStartSeconds: 0,
@@ -141,10 +139,10 @@ describe('reportLastMatchesCommand', () => {
 
   test('#handler (match is reported for several channels)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([{
+    const commandRequest = getCommandRequest([{
       ... fakeStoredReport,
       channels: [ 1, 2, 3, 4, 5 ],
-    }])
+    }] as unknown as UserReportsDoc[], true)
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['OldMatchId'])
     CodAPIHandler.prototype.getMatchInfo = jest.fn().mockResolvedValueOnce([{
       utcStartSeconds: 0,
@@ -160,10 +158,10 @@ describe('reportLastMatchesCommand', () => {
 
   test('#handler (no matches found for the user)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([{
+    const commandRequest = getCommandRequest([{
       ... fakeStoredReport,
       channels: [ 1, 2, 3, 4, 5 ],
-    }])
+    }] as unknown as UserReportsDoc[], true)
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce([])
     CodAPIHandler.prototype.getMatchInfo = jest.fn().mockResolvedValueOnce([{
       utcStartSeconds: 0,
@@ -179,10 +177,10 @@ describe('reportLastMatchesCommand', () => {
 
   test('#handler (could not get matches info)', async () => {
     dbHandler.getCredentials = jest.fn().mockResolvedValueOnce(testSSO)
-    dbHandler.getReports = jest.fn().mockResolvedValueOnce([{
+    const commandRequest = getCommandRequest([{
       ... fakeStoredReport,
       channels: [ 1, 2, 3, 4, 5 ],
-    }])
+    }] as unknown as UserReportsDoc[], true)
     CodAPIHandler.prototype.getLastMatchesIdFrom = jest.fn().mockResolvedValueOnce(['OldMatchId'])
     CodAPIHandler.prototype.getMatchInfo = jest.fn().mockRejectedValueOnce([{
       utcStartSeconds: 0,

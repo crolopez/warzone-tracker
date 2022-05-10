@@ -37,6 +37,30 @@ class CodAPIHandler {
       .map(x => x.matchID)
   }
 
+  async getLastSessionMatches(user: string, timeBetweenSessions: number): Promise<PlayerMatch[] | undefined> {
+    const response = await sendUserRequest(this.ssoToken, user, MatchesRequest)
+    if (response.status !== 'success') {
+      return undefined
+    }
+
+    if (response.data.matches === undefined) {
+      throw new Error(response.data.message)
+    }
+
+    const orderedMatches = response.data.matches
+      .sort((x, y) => y.utcStartSeconds - x.utcStartSeconds)
+
+    let previousMatch: PlayerMatch = orderedMatches[0]
+    for (const match of orderedMatches.slice(1)) {
+      const matchesDiff = previousMatch.utcStartSeconds - match.utcEndSeconds
+      if (matchesDiff > timeBetweenSessions) {
+        return orderedMatches.filter(x => x.utcStartSeconds > match.utcEndSeconds)
+      }
+      previousMatch = match
+    }
+    return orderedMatches
+  }
+
   async getMatchInfo(user: string, matchId: string): Promise<PlayerMatch[]> {
     const lastMatchInfo = await sendRequest(this.ssoToken, {
       route: MatchPlayersRequest,

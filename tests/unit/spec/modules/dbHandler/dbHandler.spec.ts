@@ -118,11 +118,13 @@ describe('dbHandler', () => {
   })
 
   test('#updateReports', async () => {
-    await dbHandler.updateReports(testUserReport, 'FakeMatchId', 989)
+    await dbHandler.updateReports(testUserReport, 'FakeMatchId', 989, 1003)
 
     expect(UserReportsModel.findByIdAndUpdate).toBeCalledWith(testUserReport.id, {
       lastMatch: 'FakeMatchId',
-      lastMatchTimestamp: 989,
+      lastMatchStartTimestamp: 989,
+      lastMatchEndTimestamp: 1003,
+      sessionReported: false,
     })
   })
 

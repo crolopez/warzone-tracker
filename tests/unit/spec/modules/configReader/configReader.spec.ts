@@ -6,6 +6,7 @@ describe('configReader', () => {
   const testAcceptSSOFrom = 'TEST:ACCEPT-SSO-FROM'
   const testMaxReportsPerUser = '3'
   const testAdminCommands = 'true'
+  const testTimeBetweenSessions = '2'
 
   beforeEach(() => {
     process.env.TELEGRAM_BOT_TOKEN = testBotToken
@@ -13,6 +14,7 @@ describe('configReader', () => {
     process.env.ACCEPT_SSO_FROM = testAcceptSSOFrom
     process.env.MAX_REPORTS_PER_USER = testMaxReportsPerUser
     process.env.ADMIN_COMMANDS = testAdminCommands
+    process.env.TIME_BETWEEN_SESSIONS = testTimeBetweenSessions
   })
 
   test('#getConfig', async () => {
@@ -24,6 +26,7 @@ describe('configReader', () => {
       acceptSSOFrom: testAcceptSSOFrom,
       maxReportsPerUser: testMaxReportsPerUser,
       adminCommands: true,
+      timeBetweenSessions: 120,
     })
   })
 
@@ -79,6 +82,17 @@ describe('configReader', () => {
       expect(1).toBe(0)
     } catch (error: any) {
       expect(error.message).toBe('ADMIN_COMMANDS is undefined')
+    }
+  })
+
+  test('#getConfig (TIME_BETWEEN_SESSIONS undefined)', async () => {
+    try {
+      delete process.env.TIME_BETWEEN_SESSIONS
+      configReader.getConfig()
+
+      expect(1).toBe(0)
+    } catch (error: any) {
+      expect(error.message).toBe('TIME_BETWEEN_SESSIONS is undefined')
     }
   })
 })

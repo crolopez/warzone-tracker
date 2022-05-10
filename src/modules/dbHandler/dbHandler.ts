@@ -20,6 +20,17 @@ async function connectMongo(): Promise<void> {
   }
 }
 
+function createUserReportEntry(userReports: UserReportsDoc): any {
+  return {
+    user: userReports.user,
+    channels: userReports.channels,
+    lastMatch: userReports.lastMatch,
+    lastMatchStartTimestamp: userReports.lastMatchStartTimestamp,
+    lastMatchEndTimestamp: userReports.lastMatchEndTimestamp,
+    sessionReported: userReports.sessionReported,
+  }
+}
+
 class DbHandler {
   async getCredentials(): Promise<CredentialsDoc | undefined> {
     await connectMongo()
@@ -65,12 +76,28 @@ class DbHandler {
       && userReports.channels.filter(x => x.valueOf() == channel)[0] !== undefined
   }
 
-  async updateReports(report: UserReportsDoc, lastMatch: string, lastMatchTimestamp: number): Promise<void> {
+  async updateReports(report: UserReportsDoc, lastMatch: string, startTime: number, endTime: number): Promise<void> {
     const updatedUserReports = {
       lastMatch: lastMatch,
-      lastMatchTimestamp: lastMatchTimestamp,
+      lastMatchStartTimestamp: startTime,
+      lastMatchEndTimestamp: endTime,
+      sessionReported: false,
     }
     await UserReportsModel.findByIdAndUpdate(report.id, updatedUserReports)
+  }
+
+  async updateSessionReport(user: string): Promise<void> {
+    const userReport = await this.getUserReports(user)
+
+    if (userReport == undefined) {
+      console.error('Unexpected error trying to update the session report')
+      return
+    }
+
+    await UserReportsModel.findByIdAndUpdate(userReport.id, {
+      ... createUserReportEntry(userReport),
+      sessionReported: true,
+    })
   }
 
   async getReports(): Promise<UserReportsDoc[]> {
@@ -93,21 +120,20 @@ class DbHandler {
         user: user,
         channels: [chatId],
         lastMatch: '',
-        lastMatchTimestamp: 0,
+        lastMatchStartTimestamp: 0,
+        lastMatchEndTimestamp: 0,
+        sessionReported: false,
       }))
       return
     }
 
-    const updatedUserReports = {
-      user: userReports.user,
+    await UserReportsModel.findByIdAndUpdate(userReports.id, {
+      ... createUserReportEntry(userReports),
       channels: [
         ... userReports.channels,
         chatId,
       ],
-      lastMatch: userReports.lastMatch,
-      lastMatchTimestamp: userReports.lastMatchTimestamp,
-    }
-    await UserReportsModel.findByIdAndUpdate(userReports.id, updatedUserReports)
+    })
   }
 }
 
